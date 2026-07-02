@@ -15,7 +15,12 @@ import os
 import sys
 import json
 import requests
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+# Zona horaria Argentina (UTC-3)
+ARG_TZ = timezone(timedelta(hours=-3))
+def ahora_argentina():
+    return datetime.now(ARG_TZ)
 from io import BytesIO
 
 # === Configuración ===
@@ -239,7 +244,7 @@ def procesar_planillas(buf_cultivos, buf_agricultura):
 
     data = {
         "empresa": "La Madrugada",
-        "generado_en": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "generado_en": ahora_argentina().strftime("%Y-%m-%d %H:%M"),
         "lotes": lotes_lista,
         "ordenes_trabajo": ordenes,
         "cultivos_dict": cultivos_dict,
@@ -268,7 +273,7 @@ def generar_html(data):
 # 4. Main
 # =========================================================================
 def main():
-    print(f"=== Actualización La Madrugada · {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===\n")
+    print(f"=== Actualización La Madrugada · {ahora_argentina().strftime('%Y-%m-%d %H:%M:%S')} ===\n")
 
     access_token = get_access_token()
 
