@@ -1,0 +1,2373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
+<title>La Madrugada — Tablero de cultivos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Blancos con tinte verde sutil */
+  --paper:        #FFFFFF;
+  --paper-2:      #F4F7EF;
+  --paper-3:      #E8EEDC;
+  /* Verdes (tintas) */
+  --ink:          #1A2B12;
+  --ink-2:        #2D4520;
+  --ink-3:        #6B826B;
+  --ink-mute:     #95A695;
+  /* Líneas */
+  --hairline:     #DDE4D2;
+  --hairline-2:   #C5D0B5;
+  /* Verdes acentos */
+  --olive:        #3A5028;
+  --olive-2:      #4F6B36;
+  --olive-3:      #7BA354;
+  --moss:         #5E8541;
+  /* Acentos cálidos para badges/alertas */
+  --ochre:        #B86E3F;
+  --rust:         #8B3A20;
+  --shadow:       0 1px 0 rgba(26,43,18,0.04), 0 2px 12px rgba(26,43,18,0.05);
+  --shadow-hover: 0 1px 0 rgba(26,43,18,0.06), 0 8px 24px rgba(26,43,18,0.08);
+  --radius:       12px;
+  --radius-sm:    6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;
+}
+
+/* ===================== HEADER ===================== */
+.header {
+  padding: 28px 0 16px;
+  border-bottom: 1px solid var(--hairline);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.brand-mark {
+  font-family: 'Fraunces', serif;
+  font-size: 56px;
+  font-weight: 600;
+  font-variation-settings: "opsz" 144;
+  color: var(--olive);
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+
+.header-meta {
+  font-size: 12px;
+  color: var(--ink-3);
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.meta-label {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.meta-value {
+  color: var(--ink-2);
+  font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ===================== HERO STATS ===================== */
+.hero {
+  padding: 28px 0 32px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding-bottom: 24px;
+  border-bottom: 1px dashed var(--hairline);
+  margin-bottom: 24px;
+}
+
+.stat {
+  padding: 0 32px;
+  border-right: 1px solid var(--hairline);
+}
+.stat:first-child { padding-left: 0; }
+.stat:last-child { border-right: none; padding-right: 0; }
+
+.stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ink-3);
+  margin-bottom: 14px;
+}
+
+.stat-value {
+  font-family: 'Fraunces', serif;
+  font-size: 48px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 144;
+  color: var(--olive);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.stat-value .unit {
+  font-size: 20px;
+  color: var(--ink-3);
+  font-weight: 400;
+  margin-left: 4px;
+  font-variation-settings: "opsz" 36;
+}
+
+.stat-sub {
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-top: 10px;
+}
+
+.stat-sub strong, .stat-sub #kpi-est, .stat-sub #kpi-cultivos {
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+/* ===================== PRONÓSTICO ===================== */
+.weather-row {
+  min-height: 96px;
+}
+
+.weather-loading {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  color: var(--ink-3);
+  text-align: center;
+  padding: 32px 0;
+  font-size: 14px;
+  font-variation-settings: "opsz" 36;
+}
+
+.weather-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.weather-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ink-3);
+}
+
+.weather-location {
+  font-size: 11px;
+  color: var(--ink-3);
+  font-style: italic;
+  font-family: 'Fraunces', serif;
+  font-variation-settings: "opsz" 24;
+}
+
+.weather-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+}
+
+.weather-day {
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  padding: 10px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--paper);
+  transition: border-color 0.2s, transform 0.2s;
+  position: relative;
+}
+
+.weather-day.today {
+  border-color: var(--olive);
+  background: var(--paper-2);
+}
+
+.weather-day:hover {
+  border-color: var(--olive-3);
+  transform: translateY(-1px);
+}
+
+.weather-dia {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+}
+.weather-day.today .weather-dia {
+  color: var(--olive);
+  font-weight: 700;
+}
+
+.weather-fecha {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.weather-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weather-temps {
+  display: flex;
+  gap: 6px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  align-items: baseline;
+}
+
+.weather-tmax { color: var(--ink); font-weight: 600; }
+.weather-tmin { color: var(--ink-3); }
+
+.weather-rain {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #2A5A8B;
+  font-weight: 500;
+}
+
+.weather-rain.dry { color: var(--ink-mute); }
+
+.weather-wind {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-2);
+}
+
+.weather-wind-arrow {
+  display: inline-block;
+  line-height: 1;
+  font-size: 11px;
+  color: var(--ochre);
+}
+
+.weather-wind.fuerte { color: var(--rust); font-weight: 600; }
+
+.weather-error {
+  text-align: center;
+  padding: 24px 20px;
+  background: var(--paper-2);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+}
+.weather-error code { font-size: 11px; }
+.weather-error a:hover { text-decoration: underline; }
+
+/* ===================== TABS ===================== */
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-top: 24px;
+  border-bottom: 1px solid var(--hairline);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  background: none;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-3);
+  padding: 14px 20px 14px 0;
+  margin-right: 28px;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab:hover { color: var(--ink-2); }
+.tab.active { color: var(--olive); }
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 28px;
+  height: 2px;
+  background: var(--olive);
+}
+
+.tab-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  background: var(--paper-2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--ink-3);
+}
+
+.tab.active .tab-count {
+  background: var(--olive);
+  color: var(--paper);
+}
+
+/* ===================== FILTROS ===================== */
+.filters {
+  display: flex;
+  gap: 12px;
+  padding: 20px 0;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  margin-right: 4px;
+}
+
+.filter-select {
+  background: var(--paper);
+  border: 1px solid var(--hairline-2);
+  border-radius: var(--radius-sm);
+  padding: 8px 32px 8px 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B826B' stroke-width='2'><polyline points='6,9 12,15 18,9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  transition: border-color 0.2s, background-color 0.2s;
+  min-height: 36px;
+}
+
+.filter-select:hover { border-color: var(--olive); }
+.filter-select:focus { outline: none; border-color: var(--olive); background-color: var(--paper-2); }
+
+.filter-clear {
+  background: none;
+  border: none;
+  color: var(--ochre);
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px;
+  font-family: inherit;
+}
+.filter-clear:hover { color: var(--rust); }
+
+/* ===================== GRILLA DE LOTES ===================== */
+.lotes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  padding: 8px 0 0;
+}
+
+.lote-card {
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.lote-card:hover {
+  border-color: var(--olive);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
+}
+
+.lote-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--cultivo-color, var(--olive-3));
+}
+
+.lote-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+
+.lote-codigo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.lote-establecimiento {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+.lote-superficie {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 72;
+  color: var(--olive);
+  text-align: right;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.lote-superficie .unit {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-left: 2px;
+  font-weight: 400;
+}
+
+.lote-cultivo-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--hairline-2);
+}
+
+.cultivo-icon {
+  color: var(--cultivo-color, var(--moss));
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.cultivo-icon svg {
+  display: block;
+}
+
+.cultivo-nombre {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.ambiente-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-3);
+  margin-left: auto;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Badge "X ambientes" en tarjeta */
+.ambientes-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--olive);
+  background: var(--paper-2);
+  border: 1px solid var(--hairline-2);
+  padding: 2px 7px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* Lista compacta de ambientes en la tarjeta */
+.ambientes-mini {
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--hairline-2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ambiente-mini-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 12px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--ink-2);
+  line-height: 1.4;
+  padding: 2px 0;
+}
+
+.ambiente-mini-nombre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+
+.ambiente-mini-cultivo {
+  font-weight: 500;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ambiente-mini-cultivo svg {
+  flex-shrink: 0;
+}
+
+.ambiente-mini-sup {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+/* Detalle de ambientes en modal */
+.ambientes-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.ambientes-table th {
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  font-weight: 500;
+  padding: 8px 10px 8px 0;
+  border-bottom: 1px solid var(--hairline-2);
+}
+
+.ambientes-table td {
+  padding: 12px 10px 12px 0;
+  border-bottom: 1px solid var(--paper-3);
+  vertical-align: top;
+}
+
+.ambientes-table tr:last-child td { border-bottom: none; }
+
+.ambientes-table td.amb-nombre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-2);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ambientes-table td.amb-cultivo {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.ambientes-table td.amb-sup {
+  font-family: 'JetBrains Mono', monospace;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ambientes-table td.amb-extra {
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+
+/* Labores por tipo dentro de la card */
+.labores-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.labor-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px 10px;
+  align-items: baseline;
+}
+
+.labor-tipo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  grid-column: 1;
+  grid-row: 1;
+  white-space: nowrap;
+  min-width: 90px;
+}
+
+.labor-fecha {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.labor-badge {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.labor-detalle {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  font-size: 11px;
+  color: var(--ink-3);
+  font-style: italic;
+  margin-left: 0;
+  padding-left: 90px;
+  margin-top: -4px;
+  line-height: 1.4;
+}
+
+.dias-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.dias-badge.reciente { background: #E8F0D9; color: #3A5028; }
+.dias-badge.medio { background: #F8E8C5; color: #7A5410; }
+.dias-badge.viejo { background: #F4D8C0; color: #8B3A20; }
+.dias-badge.futuro { background: #DCE5F0; color: #2A4A6B; }
+.dias-badge.ninguno { background: var(--paper-2); color: var(--ink-3); }
+
+.labores-empty {
+  text-align: center;
+  padding: 20px 0;
+  color: var(--ink-3);
+  font-style: italic;
+  font-size: 13px;
+  font-family: 'Fraunces', serif;
+  font-variation-settings: "opsz" 36;
+}
+
+.labores-empty .small {
+  display: block;
+  font-style: normal;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  margin-top: 6px;
+  color: var(--ink-mute);
+}
+
+/* ===================== LISTA DE TRATAMIENTOS ===================== */
+.tratamientos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.tratamiento-card {
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.tratamiento-card:hover {
+  border-color: var(--olive);
+  box-shadow: var(--shadow);
+}
+
+.tratamiento-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tratamiento-fecha-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-right: 16px;
+  border-right: 1px solid var(--hairline-2);
+  min-width: 64px;
+}
+.fecha-dia {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 72;
+  color: var(--olive);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.fecha-mes {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  margin-top: 4px;
+}
+.fecha-anio {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+
+.tratamiento-info-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tratamiento-titulo {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tratamiento-titulo .codigo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.tratamiento-titulo .establecimiento {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.tratamiento-meta {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--ink-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.tratamiento-meta .cultivo-icon {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.tratamiento-meta .cultivo-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.labor-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--paper-2);
+  color: var(--ink-2);
+}
+
+.labor-tag.pulverizacion { background: #F4D8C0; color: #8B3A20; }
+.labor-tag.fertilizacion { background: #F8E8C5; color: #7A5410; }
+.labor-tag.siembra { background: #E8F0D9; color: #3A5028; }
+.labor-tag.cosecha { background: #E5DCBF; color: #6B4F1E; }
+
+.expand-icon {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--ink-3);
+  transition: transform 0.2s;
+  font-size: 14px;
+}
+
+.tratamiento-card.expanded .expand-icon {
+  transform: rotate(90deg);
+}
+
+.tratamiento-body {
+  display: none;
+  padding: 0 20px 20px;
+  border-top: 1px dashed var(--hairline-2);
+}
+
+.tratamiento-card.expanded .tratamiento-body {
+  display: block;
+}
+
+.items-table {
+  width: 100%;
+  margin-top: 16px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.items-table th {
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  font-weight: 500;
+  padding: 10px 12px 10px 0;
+  border-bottom: 1px solid var(--hairline-2);
+}
+
+.items-table td {
+  padding: 12px 12px 12px 0;
+  border-bottom: 1px solid var(--paper-3);
+  vertical-align: middle;
+}
+
+.items-table tr:last-child td { border-bottom: none; }
+
+.producto-cell { font-weight: 500; color: var(--ink); }
+.pa-cell { font-style: italic; color: var(--ink-3); font-size: 12px; }
+.dosis-cell {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  text-align: right;
+  white-space: nowrap;
+}
+.total-cell {
+  font-family: 'JetBrains Mono', monospace;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+
+.tipo-pill {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.tipo-pill.herbicida { background: #F4D8C0; color: #8B3A20; }
+.tipo-pill.insecticida { background: #E5C8C8; color: #6B2020; }
+.tipo-pill.fungicida { background: #D9D0E5; color: #4B3A6B; }
+.tipo-pill.fertilizante { background: #F8E8C5; color: #7A5410; }
+.tipo-pill.coadyuvante { background: #DCEEDC; color: #2C5A2C; }
+.tipo-pill.labor { background: var(--paper-2); color: var(--ink-2); }
+.tipo-pill.semilla { background: #E8DCC9; color: #6B4F1E; }
+
+/* ===================== CRONOLOGÍA ===================== */
+.timeline {
+  position: relative;
+  padding: 16px 0 0 0;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  top: 24px;
+  bottom: 0;
+  width: 1px;
+  background: var(--hairline-2);
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 48px;
+  padding-bottom: 24px;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 8px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 2px solid var(--olive);
+}
+
+.timeline-item.pulverizacion::before { border-color: #A0522D; }
+.timeline-item.fertilizacion::before { border-color: #7A5410; }
+.timeline-item.siembra::before { border-color: #3A5028; }
+.timeline-item.cosecha::before { border-color: #6B4F1E; }
+
+.timeline-fecha {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  margin-bottom: 4px;
+}
+
+.timeline-titulo {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 72;
+  color: var(--ink);
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.timeline-desc {
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+/* ===================== MODAL DE LOTE ===================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 43, 18, 0.4);
+  z-index: 100;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px;
+  overflow-y: auto;
+  backdrop-filter: blur(2px);
+}
+
+.modal-backdrop.active {
+  display: flex;
+}
+
+.modal {
+  background: var(--paper);
+  border-radius: var(--radius);
+  max-width: 720px;
+  width: 100%;
+  padding: 32px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(26, 43, 18, 0.2);
+  border: 1px solid var(--hairline);
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--ink-3);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+}
+.modal-close:hover {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+.modal-codigo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.modal-establecimiento {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  margin-top: 6px;
+}
+
+.modal-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.modal-stat {
+  border-left: 2px solid var(--hairline-2);
+  padding-left: 12px;
+}
+
+.modal-stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  margin-bottom: 4px;
+}
+
+.modal-stat-value {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 36;
+  color: var(--ink);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.modal-stat-value .small { font-size: 12px; color: var(--ink-3); font-weight: 400; }
+
+.modal-section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ink-3);
+  margin: 24px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--hairline-2);
+}
+
+.planificacion-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px 20px;
+  font-size: 13px;
+}
+
+.planificacion-row dt {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.planificacion-row dd {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.orden-mini {
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.orden-mini-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.orden-mini-fecha {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.orden-mini-items {
+  font-size: 12px;
+  color: var(--ink-2);
+  line-height: 1.7;
+}
+
+.orden-mini-items .producto-line {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dotted var(--hairline);
+  padding: 4px 0;
+  gap: 12px;
+}
+
+.orden-mini-items .producto-line:last-child { border: none; }
+
+.orden-mini-items .dosis-mini {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+/* ===================== EMPTY / UTILS ===================== */
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--ink-3);
+  grid-column: 1 / -1;
+}
+
+.empty-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-style: italic;
+  color: var(--ink-2);
+  margin-bottom: 8px;
+  font-variation-settings: "opsz" 72;
+}
+
+.empty-sub { font-size: 13px; }
+
+.view { display: none; }
+.view.active { display: block; }
+
+.section-label {
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink-3);
+  margin: 24px 0 8px;
+  font-variation-settings: "opsz" 24;
+}
+
+/* ===================== MOBILE ===================== */
+@media (max-width: 720px) {
+  body { font-size: 14px; }
+  .container { padding: 0 16px; }
+  .header { padding: 20px 0 12px; }
+  .brand-mark { font-size: 42px; }
+  .header-meta { font-size: 11px; }
+
+  .hero { padding: 20px 0 24px; }
+  .hero-stats {
+    grid-template-columns: 1fr 1fr;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+  }
+
+  .stat { padding: 0 12px; }
+  .stat:first-child { padding-left: 0; }
+  .stat:last-child { padding-right: 0; border-right: none; }
+
+  .stat-value { font-size: 36px; }
+
+  .weather-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+  }
+  .weather-day { padding: 8px 4px; gap: 4px; }
+  .weather-icon { width: 28px; height: 28px; }
+
+  .tabs { margin-top: 16px; }
+  .tab { padding: 12px 0; margin-right: 20px; font-size: 12px; }
+  .tab.active::after { right: 20px; }
+
+  .filters { padding: 16px 0; gap: 8px; }
+  .filter-select { font-size: 12px; padding: 7px 28px 7px 10px; }
+
+  .lotes-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .lote-card { padding: 16px; }
+  .lote-codigo { font-size: 19px; }
+  .lote-superficie { font-size: 19px; }
+
+  .labor-tipo { min-width: 76px; font-size: 8.5px; }
+  .labor-detalle { padding-left: 76px; }
+
+  .tratamiento-header {
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    padding: 14px 16px;
+  }
+
+  .expand-icon { grid-column: 2; justify-self: end; align-self: start; }
+  .tratamiento-info-main { grid-column: 2; }
+  .fecha-dia { font-size: 24px; }
+
+  .items-table { font-size: 12px; }
+  .items-table th, .items-table td { padding: 8px 8px 8px 0; }
+  .items-table .col-pa, .items-table .pa-cell { display: none; }
+  .items-table .col-total, .items-table .total-cell { display: none; }
+
+  .modal-backdrop { padding: 16px; }
+  .modal { padding: 20px; }
+  .modal-codigo { font-size: 26px; }
+  .modal-stats { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 420px) {
+  .header { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .lote-head { flex-direction: column; gap: 8px; }
+  .lote-superficie { text-align: left; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header class="header">
+    <div class="brand-mark">La Madrugada</div>
+    <div class="header-meta">
+      <span class="meta-label">Actualizado</span>
+      <span class="meta-value" id="updated-date">—</span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-label">Lotes</div>
+        <div class="stat-value" id="kpi-lotes">—</div>
+        <div class="stat-sub" id="kpi-cultivos">— cultivos distintos</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Superficie total</div>
+        <div class="stat-value" id="kpi-ha">—<span class="unit">ha</span></div>
+        <div class="stat-sub">en <span id="kpi-est">—</span> establecimientos</div>
+      </div>
+    </div>
+    <div class="weather-row" id="weather-row">
+      <div class="weather-loading">Cargando pronóstico…</div>
+    </div>
+  </section>
+
+  <nav class="tabs">
+    <button class="tab active" data-view="lotes">
+      Lotes <span class="tab-count" id="count-lotes">0</span>
+    </button>
+    <button class="tab" data-view="tratamientos">
+      Tratamientos <span class="tab-count" id="count-trat">0</span>
+    </button>
+  </nav>
+
+  <section class="filters" id="filters">
+    <span class="filter-label">Filtrar por</span>
+    <select class="filter-select" id="filter-campana">
+      <option value="">Todas las campañas</option>
+    </select>
+    <select class="filter-select" id="filter-est">
+      <option value="">Todos los establecimientos</option>
+    </select>
+    <select class="filter-select" id="filter-cultivo">
+      <option value="">Todos los cultivos</option>
+    </select>
+    <select class="filter-select" id="filter-tipo">
+      <option value="">Cualquier tipo de labor</option>
+    </select>
+    <button class="filter-clear" id="filter-clear" style="display:none">Limpiar</button>
+  </section>
+
+  <main>
+    <div class="view active" id="view-lotes">
+      <div class="lotes-grid" id="lotes-grid"></div>
+    </div>
+
+    <div class="view" id="view-tratamientos">
+      <div class="tratamientos-list" id="tratamientos-list"></div>
+    </div>
+
+  </main>
+
+</div>
+
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal" id="modal-content">
+    <button class="modal-close" id="modal-close" aria-label="Cerrar">×</button>
+    <div id="modal-inner"></div>
+  </div>
+</div>
+
+<script>
+const DATA = {"empresa":"La Madrugada","generado_en":"2026-07-02 13:44","lotes":[{"establecimiento":"La_Madrugada","lote":"LMa_02","superficie":90.0,"cultivo_actual":"Maiz","destino_actual":"Cosecha","antecesor":"Girasol","campaña_planificada":"26-27","fecha_siembra_planificada":null,"semillero":"","genetica":"LT 725 tre","fertilizante_p":"Microessentials SZ","dosis_fert_p":130.0,"fertilizante_n":"Urea","dosis_fert_n":null,"tiene_ambientes":false,"n_ambientes":0,"ambientes":[],"ordenes_trabajo":[{"fecha":"2026-05-08","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_02","superficie":90.0,"campaña":"26-27","cultivo_abrev":"mz","cultivo":"Maíz","antecesor_abrev":"gi","antecesor":"Girasol","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":90.0},{"producto":"sulfosato","dosis":2.0,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":180.0},{"producto":"2,4d herbifen advance","dosis":1.0,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":90.0},{"producto":"dicamba","dosis":0.12,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":10.799999999999999},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.8},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":22.5}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""}]},{"establecimiento":"La_Madrugada","lote":"LMa_03","superficie":55.0,"cultivo_actual":"Soja","destino_actual":"Cosecha","antecesor":"Maiz","campaña_planificada":"26-27","fecha_siembra_planificada":null,"semillero":"","genetica":"Dm 46e25","fertilizante_p":"","dosis_fert_p":null,"fertilizante_n":"","dosis_fert_n":null,"tiene_ambientes":false,"n_ambientes":0,"ambientes":[],"ordenes_trabajo":[{"fecha":"2026-05-27","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_03","superficie":55.0,"campaña":"26-27","cultivo_abrev":"sj","cultivo":"Soja 1ra","antecesor_abrev":"mz","antecesor":"Maíz","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":55.0},{"producto":"glifosato la tijereta II","dosis":2.0,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":110.0},{"producto":"2,4d herbifen advance","dosis":1.2,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":66.0},{"producto":"dicamba","dosis":0.12,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":6.6},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.1},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":13.75}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""}]},{"establecimiento":"La_Madrugada","lote":"LMa_3m","superficie":55.4,"cultivo_actual":"Avena","destino_actual":"Cosecha","antecesor":"Girasol","campaña_planificada":"26-27","fecha_siembra_planificada":"2026-06-12","semillero":"","genetica":"Avena","fertilizante_p":"Fosfato Monoamonico","dosis_fert_p":100.0,"fertilizante_n":"Urea","dosis_fert_n":180.0,"tiene_ambientes":true,"n_ambientes":5,"ambientes":[{"ambiente":"Loma 3","campaña":"26-27","superficie":4.1,"cultivo":"Cebada","destino":"Cosecha","antecesor":"Girasol","fecha_siembra":"2026-06-03","semillero":"","genetica":"Cebada","densidad_recomendada":140.0,"rinde_esperado":null,"fertilizante_p":"Fosfato Monoamonico","dosis_fert_p":100.0,"fertilizante_n":"Urea","dosis_fert_n":70.0},{"ambiente":"Loma 2","campaña":"26-27","superficie":5.2,"cultivo":"Centeno","destino":"Cosecha","antecesor":"Girasol","fecha_siembra":"2026-06-02","semillero":"","genetica":"Centeno","densidad_recomendada":60.0,"rinde_esperado":null,"fertilizante_p":"Fosfato Monoamonico","dosis_fert_p":100.0,"fertilizante_n":"Urea","dosis_fert_n":110.0},{"ambiente":"Media Loma 2","campaña":"26-27","superficie":35.0,"cultivo":"Avena","destino":"Cosecha","antecesor":"Girasol","fecha_siembra":"2026-06-12","semillero":"","genetica":"Avena","densidad_recomendada":90.0,"rinde_esperado":null,"fertilizante_p":"Fosfato Monoamonico","dosis_fert_p":100.0,"fertilizante_n":"Urea","dosis_fert_n":180.0},{"ambiente":"Media Loma 2","campaña":"26-27","superficie":8.0,"cultivo":"Cebada","destino":"Cosecha","antecesor":"Girasol","fecha_siembra":"2026-06-03","semillero":"","genetica":"Cebada","densidad_recomendada":140.0,"rinde_esperado":null,"fertilizante_p":"Fosfato Monoamonico","dosis_fert_p":100.0,"fertilizante_n":"Urea","dosis_fert_n":180.0},{"ambiente":"Bajo Malo","campaña":"26-27","superficie":3.1,"cultivo":"Centeno","destino":"Cosecha","antecesor":"Girasol","fecha_siembra":"2026-06-02","semillero":"","genetica":"Centeno","densidad_recomendada":60.0,"rinde_esperado":null,"fertilizante_p":"Fosfato Monoamonico","dosis_fert_p":100.0,"fertilizante_n":"Urea","dosis_fert_n":70.0}],"ordenes_trabajo":[{"fecha":"2026-06-03","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_3m","superficie":55.0,"campaña":"26-27","cultivo_abrev":"ce","cultivo":"Cebada","antecesor_abrev":"gi","antecesor":"Girasol","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":55.0},{"producto":"glifosato la tijereta II","dosis":1.4,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":77.0},{"producto":"2,4d herbifen advance","dosis":0.5,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":27.5},{"producto":"metsulfuron","dosis":0.005,"unidad":"kg","tipo":"Herbicida","pa":"Metsulfuron metil","total":0.275},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":13.75},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.1}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""},{"fecha":"2026-05-08","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_3m","superficie":55.0,"campaña":"26-27","cultivo_abrev":"ce","cultivo":"Cebada","antecesor_abrev":"gi","antecesor":"Girasol","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":55.0},{"producto":"sulfosato","dosis":1.8,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":99.0},{"producto":"2,4d herbifen advance","dosis":0.72,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":39.6},{"producto":"dicamba","dosis":0.12,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":6.6},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.1},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":13.75}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""}]},{"establecimiento":"La_Madrugada","lote":"LMa_4m","superficie":50.0,"cultivo_actual":"Girasol","destino_actual":"Cosecha","antecesor":"Soja 2da","campaña_planificada":"26-27","fecha_siembra_planificada":null,"semillero":"","genetica":"SYN 3979 CL AO","fertilizante_p":"","dosis_fert_p":null,"fertilizante_n":"","dosis_fert_n":null,"tiene_ambientes":false,"n_ambientes":0,"ambientes":[],"ordenes_trabajo":[{"fecha":"2026-05-27","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_4m","superficie":50.0,"campaña":"26-27","cultivo_abrev":"gi","cultivo":"Girasol","antecesor_abrev":"sj2","antecesor":"Soja 2da","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":50.0},{"producto":"glifosato la tijereta II","dosis":1.7,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":85.0},{"producto":"2,4d herbifen advance","dosis":1.0,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":50.0},{"producto":"cletodim 24%","dosis":1.0,"unidad":"litros","tipo":"Herbicida","pa":"cletodim 24%","total":50.0},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.0},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":12.5}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""}]},{"establecimiento":"La_Madrugada","lote":"LMa_5","superficie":30.0,"cultivo_actual":"Maiz","destino_actual":"Cosecha","antecesor":"Girasol","campaña_planificada":"26-27","fecha_siembra_planificada":null,"semillero":"","genetica":"LT 725 tre","fertilizante_p":"Microessentials SZ","dosis_fert_p":130.0,"fertilizante_n":"Urea","dosis_fert_n":null,"tiene_ambientes":false,"n_ambientes":0,"ambientes":[],"ordenes_trabajo":[{"fecha":"2026-05-08","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_5","superficie":30.0,"campaña":"26-27","cultivo_abrev":"mz","cultivo":"Maíz","antecesor_abrev":"sj","antecesor":"Soja 1ra","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":30.0},{"producto":"sulfosato","dosis":1.8,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":54.0},{"producto":"2,4d herbifen advance","dosis":0.6,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":18.0},{"producto":"dicamba","dosis":0.12,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":3.5999999999999996},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":0.6},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":7.5}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""}]},{"establecimiento":"La_Madrugada","lote":"LMa_5m","superficie":40.0,"cultivo_actual":"Girasol","destino_actual":"Cosecha","antecesor":"Maiz","campaña_planificada":"26-27","fecha_siembra_planificada":null,"semillero":"","genetica":"SYN 3970 CL","fertilizante_p":"","dosis_fert_p":null,"fertilizante_n":"","dosis_fert_n":null,"tiene_ambientes":false,"n_ambientes":0,"ambientes":[],"ordenes_trabajo":[]},{"establecimiento":"La_Madrugada","lote":"LMa_6","superficie":55.0,"cultivo_actual":"Girasol","destino_actual":"Cosecha","antecesor":"Soja","campaña_planificada":"26-27","fecha_siembra_planificada":null,"semillero":"","genetica":"SYN 3970 CL","fertilizante_p":"","dosis_fert_p":null,"fertilizante_n":"","dosis_fert_n":null,"tiene_ambientes":false,"n_ambientes":0,"ambientes":[],"ordenes_trabajo":[{"fecha":"2026-05-08","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_6","superficie":55.0,"campaña":"26-27","cultivo_abrev":"gi","cultivo":"Girasol","antecesor_abrev":"sj","antecesor":"Soja 1ra","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":55.0},{"producto":"sulfosato","dosis":2.5,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":137.5},{"producto":"2,4d herbifen advance","dosis":0.6,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":33.0},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.1},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":13.75}],"n_productos":5,"contratista":"","real_presup":"","observaciones":""}]},{"establecimiento":"La_Madrugada","lote":"LMa_6m","superficie":55.0,"cultivo_actual":"Soja","destino_actual":"Cosecha","antecesor":"Maiz","campaña_planificada":"26-27","fecha_siembra_planificada":null,"semillero":"","genetica":"DM 46i20","fertilizante_p":"","dosis_fert_p":null,"fertilizante_n":"","dosis_fert_n":null,"tiene_ambientes":false,"n_ambientes":0,"ambientes":[],"ordenes_trabajo":[]},{"establecimiento":"La_Madrugada","lote":"LMa_7","superficie":55.0,"cultivo_actual":"Girasol","destino_actual":"Cosecha","antecesor":"Soja","campaña_planificada":"26-27","fecha_siembra_planificada":null,"semillero":"","genetica":"ADV 5407 Cl","fertilizante_p":"","dosis_fert_p":null,"fertilizante_n":"","dosis_fert_n":null,"tiene_ambientes":false,"n_ambientes":0,"ambientes":[],"ordenes_trabajo":[{"fecha":"2026-05-08","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_7","superficie":55.0,"campaña":"26-27","cultivo_abrev":"gi","cultivo":"Girasol","antecesor_abrev":"sj","antecesor":"Soja 1ra","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":55.0},{"producto":"sulfosato","dosis":1.8,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":99.0},{"producto":"2,4d herbifen advance","dosis":0.6,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":33.0},{"producto":"dicamba","dosis":0.12,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":6.6},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.1},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":13.75}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""}]},{"establecimiento":"La_Madrugada","lote":"LMa_7m","superficie":55.0,"cultivo_actual":"Centeno","destino_actual":"Cobertura","antecesor":"Girasol","campaña_planificada":"26-27","fecha_siembra_planificada":null,"semillero":"","genetica":"Centeno","fertilizante_p":"Fosfato Monoamonico","dosis_fert_p":50.0,"fertilizante_n":"","dosis_fert_n":null,"tiene_ambientes":false,"n_ambientes":0,"ambientes":[],"ordenes_trabajo":[{"fecha":"2026-05-08","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_7m","superficie":55.0,"campaña":"26-27","cultivo_abrev":"cc","cultivo":"Cultivo de Cobertura","antecesor_abrev":"gi","antecesor":"Girasol","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":55.0},{"producto":"sulfosato","dosis":2.0,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":110.0},{"producto":"2,4d herbifen advance","dosis":1.0,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":55.0},{"producto":"dicamba","dosis":0.12,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":6.6},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.1},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":13.75}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""}]},{"establecimiento":"La_Madrugada","lote":"LMa_8","superficie":32.0,"cultivo_actual":"Girasol","destino_actual":"Cosecha","antecesor":"Soja","campaña_planificada":"26-27","fecha_siembra_planificada":null,"semillero":"","genetica":"ADV 5407 Cl","fertilizante_p":"","dosis_fert_p":null,"fertilizante_n":"","dosis_fert_n":null,"tiene_ambientes":false,"n_ambientes":0,"ambientes":[],"ordenes_trabajo":[{"fecha":"2026-05-08","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_8","superficie":32.0,"campaña":"26-27","cultivo_abrev":"gi","cultivo":"Girasol","antecesor_abrev":"sj","antecesor":"Soja 1ra","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":32.0},{"producto":"sulfosato","dosis":1.8,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":57.6},{"producto":"2,4d herbifen advance","dosis":0.6,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":19.2},{"producto":"dicamba","dosis":0.12,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":3.84},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":0.64},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":8.0}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""}]},{"establecimiento":"La_Madrugada","lote":"LMa_8m","superficie":40.0,"cultivo_actual":"Soja","destino_actual":"Cosecha","antecesor":"Maiz","campaña_planificada":"26-27","fecha_siembra_planificada":null,"semillero":"","genetica":"Dm 46e25","fertilizante_p":"","dosis_fert_p":null,"fertilizante_n":"","dosis_fert_n":null,"tiene_ambientes":false,"n_ambientes":0,"ambientes":[],"ordenes_trabajo":[]},{"establecimiento":"La_Madrugada","lote":"Llorones","superficie":24.0,"cultivo_actual":"Pastura","destino_actual":"","antecesor":"Pastura","campaña_planificada":"26-27","fecha_siembra_planificada":null,"semillero":"","genetica":"","fertilizante_p":"","dosis_fert_p":null,"fertilizante_n":"","dosis_fert_n":null,"tiene_ambientes":false,"n_ambientes":0,"ambientes":[],"ordenes_trabajo":[{"fecha":"2026-06-30","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"Llorones","superficie":24.0,"campaña":"26-27","cultivo_abrev":"pp","cultivo":"Pastura","antecesor_abrev":"pp","antecesor":"Pastura","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":24.0},{"producto":"2,4d herbifen advance","dosis":1.0,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":24.0},{"producto":"dicamba","dosis":0.2,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":4.800000000000001},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":6.0},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":0.48}],"n_productos":5,"contratista":"","real_presup":"","observaciones":""}]},{"establecimiento":"La_Madrugada","lote":"Pastura","superficie":4.0,"cultivo_actual":"Pastura","destino_actual":"","antecesor":"Pastura","campaña_planificada":"26-27","fecha_siembra_planificada":null,"semillero":"","genetica":"","fertilizante_p":"","dosis_fert_p":null,"fertilizante_n":"","dosis_fert_n":null,"tiene_ambientes":false,"n_ambientes":0,"ambientes":[],"ordenes_trabajo":[{"fecha":"2026-06-30","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"Pastura","superficie":4.0,"campaña":"26-27","cultivo_abrev":"pp","cultivo":"Pastura","antecesor_abrev":"pp","antecesor":"Pastura","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":4.0},{"producto":"glifosato lt platinum ii","dosis":3.5,"unidad":"litros","tipo":"Herbicida","pa":"glifosato sal potasica 66,2%","total":14.0},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":1.0},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":0.08}],"n_productos":4,"contratista":"","real_presup":"","observaciones":""}]},{"establecimiento":"La_Rodesia","lote":"LRo_1","superficie":60.0,"cultivo_actual":"Cebada","destino_actual":"Cobertura","antecesor":"Mani","campaña_planificada":"26-27","fecha_siembra_planificada":null,"semillero":"","genetica":"","fertilizante_p":"Fosfato Monoamonico","dosis_fert_p":50.0,"fertilizante_n":"","dosis_fert_n":null,"tiene_ambientes":false,"n_ambientes":0,"ambientes":[],"ordenes_trabajo":[{"fecha":"2026-06-08","fecha_realizado":null,"establecimiento":"La_Rodesia","lote":"LRo_1","superficie":60.0,"campaña":"26-27","cultivo_abrev":"cc","cultivo":"Cultivo de Cobertura","antecesor_abrev":"mn","antecesor":"Mani","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":60.0},{"producto":"glifosato la tijereta II","dosis":2.0,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":120.0},{"producto":"2,4d herbifen advance","dosis":1.2,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":72.0},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":15.0},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.2},{"producto":"metsulfuron","dosis":0.005,"unidad":"kg","tipo":"Herbicida","pa":"Metsulfuron metil","total":0.3}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""}]},{"establecimiento":"La_Rodesia","lote":"LRo_2","superficie":30.0,"cultivo_actual":"Soja","destino_actual":"Cosecha","antecesor":"Maiz","campaña_planificada":"26-27","fecha_siembra_planificada":null,"semillero":"","genetica":"DM 46i20","fertilizante_p":"","dosis_fert_p":null,"fertilizante_n":"","dosis_fert_n":null,"tiene_ambientes":false,"n_ambientes":0,"ambientes":[],"ordenes_trabajo":[]}],"ordenes_trabajo":[{"fecha":"2026-06-30","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"Llorones","superficie":24.0,"campaña":"26-27","cultivo_abrev":"pp","cultivo":"Pastura","antecesor_abrev":"pp","antecesor":"Pastura","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":24.0},{"producto":"2,4d herbifen advance","dosis":1.0,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":24.0},{"producto":"dicamba","dosis":0.2,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":4.800000000000001},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":6.0},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":0.48}],"n_productos":5,"contratista":"","real_presup":"","observaciones":""},{"fecha":"2026-06-30","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"Pastura","superficie":4.0,"campaña":"26-27","cultivo_abrev":"pp","cultivo":"Pastura","antecesor_abrev":"pp","antecesor":"Pastura","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":4.0},{"producto":"glifosato lt platinum ii","dosis":3.5,"unidad":"litros","tipo":"Herbicida","pa":"glifosato sal potasica 66,2%","total":14.0},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":1.0},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":0.08}],"n_productos":4,"contratista":"","real_presup":"","observaciones":""},{"fecha":"2026-06-08","fecha_realizado":null,"establecimiento":"La_Rodesia","lote":"LRo_1","superficie":60.0,"campaña":"26-27","cultivo_abrev":"cc","cultivo":"Cultivo de Cobertura","antecesor_abrev":"mn","antecesor":"Mani","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":60.0},{"producto":"glifosato la tijereta II","dosis":2.0,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":120.0},{"producto":"2,4d herbifen advance","dosis":1.2,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":72.0},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":15.0},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.2},{"producto":"metsulfuron","dosis":0.005,"unidad":"kg","tipo":"Herbicida","pa":"Metsulfuron metil","total":0.3}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""},{"fecha":"2026-06-03","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_3m","superficie":55.0,"campaña":"26-27","cultivo_abrev":"ce","cultivo":"Cebada","antecesor_abrev":"gi","antecesor":"Girasol","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":55.0},{"producto":"glifosato la tijereta II","dosis":1.4,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":77.0},{"producto":"2,4d herbifen advance","dosis":0.5,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":27.5},{"producto":"metsulfuron","dosis":0.005,"unidad":"kg","tipo":"Herbicida","pa":"Metsulfuron metil","total":0.275},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":13.75},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.1}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""},{"fecha":"2026-05-27","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_03","superficie":55.0,"campaña":"26-27","cultivo_abrev":"sj","cultivo":"Soja 1ra","antecesor_abrev":"mz","antecesor":"Maíz","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":55.0},{"producto":"glifosato la tijereta II","dosis":2.0,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":110.0},{"producto":"2,4d herbifen advance","dosis":1.2,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":66.0},{"producto":"dicamba","dosis":0.12,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":6.6},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.1},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":13.75}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""},{"fecha":"2026-05-27","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_4m","superficie":50.0,"campaña":"26-27","cultivo_abrev":"gi","cultivo":"Girasol","antecesor_abrev":"sj2","antecesor":"Soja 2da","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":50.0},{"producto":"glifosato la tijereta II","dosis":1.7,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":85.0},{"producto":"2,4d herbifen advance","dosis":1.0,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":50.0},{"producto":"cletodim 24%","dosis":1.0,"unidad":"litros","tipo":"Herbicida","pa":"cletodim 24%","total":50.0},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.0},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":12.5}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""},{"fecha":"2026-05-08","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_02","superficie":90.0,"campaña":"26-27","cultivo_abrev":"mz","cultivo":"Maíz","antecesor_abrev":"gi","antecesor":"Girasol","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":90.0},{"producto":"sulfosato","dosis":2.0,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":180.0},{"producto":"2,4d herbifen advance","dosis":1.0,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":90.0},{"producto":"dicamba","dosis":0.12,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":10.799999999999999},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.8},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":22.5}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""},{"fecha":"2026-05-08","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_3m","superficie":55.0,"campaña":"26-27","cultivo_abrev":"ce","cultivo":"Cebada","antecesor_abrev":"gi","antecesor":"Girasol","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":55.0},{"producto":"sulfosato","dosis":1.8,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":99.0},{"producto":"2,4d herbifen advance","dosis":0.72,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":39.6},{"producto":"dicamba","dosis":0.12,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":6.6},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.1},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":13.75}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""},{"fecha":"2026-05-08","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_5","superficie":30.0,"campaña":"26-27","cultivo_abrev":"mz","cultivo":"Maíz","antecesor_abrev":"sj","antecesor":"Soja 1ra","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":30.0},{"producto":"sulfosato","dosis":1.8,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":54.0},{"producto":"2,4d herbifen advance","dosis":0.6,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":18.0},{"producto":"dicamba","dosis":0.12,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":3.5999999999999996},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":0.6},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":7.5}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""},{"fecha":"2026-05-08","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_6","superficie":55.0,"campaña":"26-27","cultivo_abrev":"gi","cultivo":"Girasol","antecesor_abrev":"sj","antecesor":"Soja 1ra","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":55.0},{"producto":"sulfosato","dosis":2.5,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":137.5},{"producto":"2,4d herbifen advance","dosis":0.6,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":33.0},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.1},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":13.75}],"n_productos":5,"contratista":"","real_presup":"","observaciones":""},{"fecha":"2026-05-08","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_7","superficie":55.0,"campaña":"26-27","cultivo_abrev":"gi","cultivo":"Girasol","antecesor_abrev":"sj","antecesor":"Soja 1ra","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":55.0},{"producto":"sulfosato","dosis":1.8,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":99.0},{"producto":"2,4d herbifen advance","dosis":0.6,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":33.0},{"producto":"dicamba","dosis":0.12,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":6.6},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.1},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":13.75}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""},{"fecha":"2026-05-08","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_7m","superficie":55.0,"campaña":"26-27","cultivo_abrev":"cc","cultivo":"Cultivo de Cobertura","antecesor_abrev":"gi","antecesor":"Girasol","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":55.0},{"producto":"sulfosato","dosis":2.0,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":110.0},{"producto":"2,4d herbifen advance","dosis":1.0,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":55.0},{"producto":"dicamba","dosis":0.12,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":6.6},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":1.1},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":13.75}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""},{"fecha":"2026-05-08","fecha_realizado":null,"establecimiento":"La_Madrugada","lote":"LMa_8","superficie":32.0,"campaña":"26-27","cultivo_abrev":"gi","cultivo":"Girasol","antecesor_abrev":"sj","antecesor":"Soja 1ra","tipo_labor":"Pulverización","items":[{"producto":"pulvT","dosis":1.0,"unidad":"ha","tipo":"Labor","pa":"-","total":32.0},{"producto":"sulfosato","dosis":1.8,"unidad":"litros","tipo":"Herbicida","pa":"Glifosato","total":57.6},{"producto":"2,4d herbifen advance","dosis":0.6,"unidad":"litros","tipo":"Herbicida","pa":"2,4d","total":19.2},{"producto":"dicamba","dosis":0.12,"unidad":"litros","tipo":"Herbicida","pa":"Dicamba","total":3.84},{"producto":"rizospray CS","dosis":0.02,"unidad":"litros","tipo":"Coadyuvante","pa":"Corrector","total":0.64},{"producto":"aceite vegetal","dosis":0.25,"unidad":"litros","tipo":"Coadyuvante","pa":"Antievaporante","total":8.0}],"n_productos":6,"contratista":"","real_presup":"","observaciones":""}],"cultivos_dict":{"agr":"Agropiro","arv":"Arveja","av":"Avena","cc":"Cultivo de Cobertura","ce":"Cebada","ces":"Cebada Silo","ces/vics":"Cebada/Vicia Silo","ct":"Centeno","cz":"Colza","gi":"Girasol","mz":"Maíz","mzt":"Maíz tardío","mz pop":"Maíz Pisingallo","mz(-)":"Maíz baja tecnologia","mz2":"Maíz 2da","mzs":"Maíz Silo","mzst":"Maíz Silo Tardío","mzs2":"Maíz Silo 2da","nat":"Natural","pi":"Pastura Implantación","pp":"Pastura","rollo ce":"Rollo de Cebada","sg":"Sorgo","sgf":"Sorgo Forrajero","sgp":"Sorgo Pastoreo","sgs":"Sorgo Silo","sj":"Soja 1ra","sj2":"Soja 2da","sjp":"Soja Pastoreo","sjs":"Soja Silo","sjs/mzs":"Soja Silo/Maíz Silo","tr":"Trigo","trs":"Trigo Silo","trit":"Triticale","trits":"Triticale Silo","vi":"Verdeo de Invierno","vv":"Verdeo de Verano","mn":"Mani",".":"—"},"totales":{"n_lotes":16,"n_ordenes":13,"establecimientos":["La_Madrugada","La_Rodesia"],"superficie_total":730.4}};
+
+// =============== Helpers ===============
+const MESES = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+
+const CULTIVO_COLORS = {
+  'Soja': '#5E8541', 'Soja 1ra': '#5E8541', 'Soja 2da': '#7BA354', 'Soja Pastoreo': '#7BA354',
+  'Maíz': '#C49340', 'Maíz tardío': '#B5832F', 'Maíz 2da': '#C49340', 'Maíz Pisingallo': '#C49340',
+  'Maíz baja tecnologia': '#C49340',
+  'Maíz Silo': '#A87830', 'Maíz Silo Tardío': '#A87830', 'Maíz Silo 2da': '#A87830',
+  'Trigo': '#B89048', 'Cebada': '#C8A858', 'Cebada Silo': '#C8A858', 'Avena': '#D0B868',
+  'Cebada/Vicia Silo': '#C8A858', 'Rollo de Cebada': '#C8A858',
+  'Girasol': '#E0A030',
+  'Centeno': '#8B7A5C', 'Cultivo de Cobertura': '#4F6B36',
+  'Colza': '#E5C040', 'Sorgo': '#A85A3D', 'Sorgo Forrajero': '#A85A3D',
+  'Sorgo Pastoreo': '#A85A3D', 'Sorgo Silo': '#8B4830',
+  'Pastura': '#6B8B45', 'Pastura Implantación': '#6B8B45', 'Natural': '#7A8B5C',
+  'Agropiro': '#7A8B5C', 'Arveja': '#7BA354',
+  '—': '#95A695'
+};
+
+// === SVG icons por tipo de cultivo ===
+const SVG_ICONS = {
+  maiz: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M7 4 Q4 9 5 15 Q8 13 10 8 Z" opacity="0.55"/><path d="M17 4 Q20 9 19 15 Q16 13 14 8 Z" opacity="0.55"/><ellipse cx="12" cy="13" rx="3.2" ry="8"/><g fill="rgba(255,255,255,0.35)"><circle cx="11" cy="8" r="0.55"/><circle cx="13" cy="8" r="0.55"/><circle cx="10.4" cy="10.5" r="0.55"/><circle cx="12" cy="10.5" r="0.55"/><circle cx="13.6" cy="10.5" r="0.55"/><circle cx="11" cy="13" r="0.55"/><circle cx="13" cy="13" r="0.55"/><circle cx="10.4" cy="15.5" r="0.55"/><circle cx="12" cy="15.5" r="0.55"/><circle cx="13.6" cy="15.5" r="0.55"/><circle cx="11" cy="18" r="0.55"/><circle cx="13" cy="18" r="0.55"/></g></svg>',
+
+  espiga: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><line x1="12" y1="13" x2="12" y2="22" stroke="currentColor" stroke-width="1"/><line x1="12" y1="2" x2="12" y2="5" stroke="currentColor" stroke-width="0.7"/><line x1="9" y1="2.5" x2="10.5" y2="5" stroke="currentColor" stroke-width="0.7"/><line x1="15" y1="2.5" x2="13.5" y2="5" stroke="currentColor" stroke-width="0.7"/><ellipse cx="9.5" cy="6.5" rx="1.3" ry="2.3" transform="rotate(-25 9.5 6.5)"/><ellipse cx="14.5" cy="6.5" rx="1.3" ry="2.3" transform="rotate(25 14.5 6.5)"/><ellipse cx="9.5" cy="10" rx="1.3" ry="2.3" transform="rotate(-25 9.5 10)"/><ellipse cx="14.5" cy="10" rx="1.3" ry="2.3" transform="rotate(25 14.5 10)"/><ellipse cx="9.5" cy="13.5" rx="1.3" ry="2.3" transform="rotate(-25 9.5 13.5)"/><ellipse cx="14.5" cy="13.5" rx="1.3" ry="2.3" transform="rotate(25 14.5 13.5)"/></svg>',
+
+  soja: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M4 11 Q4 8 7 7 Q12 7 17 8 Q20 9 20 12 Q20 15 17 16 Q12 16 7 15 Q4 14 4 11 Z"/><circle cx="8.5" cy="11.5" r="1.5" fill="rgba(255,255,255,0.45)"/><circle cx="12" cy="11.5" r="1.6" fill="rgba(255,255,255,0.45)"/><circle cx="15.5" cy="11.5" r="1.5" fill="rgba(255,255,255,0.45)"/><path d="M3 9 Q1 8 2 6" stroke="currentColor" stroke-width="0.8" fill="none"/></svg>',
+
+  girasol: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><g><ellipse cx="12" cy="3.5" rx="2" ry="3.2"/><ellipse cx="12" cy="20.5" rx="2" ry="3.2"/><ellipse cx="3.5" cy="12" rx="3.2" ry="2"/><ellipse cx="20.5" cy="12" rx="3.2" ry="2"/><ellipse cx="6" cy="6" rx="2.4" ry="2.4" transform="rotate(-45 6 6)"/><ellipse cx="18" cy="6" rx="2.4" ry="2.4" transform="rotate(45 18 6)"/><ellipse cx="6" cy="18" rx="2.4" ry="2.4" transform="rotate(45 6 18)"/><ellipse cx="18" cy="18" rx="2.4" ry="2.4" transform="rotate(-45 18 18)"/></g><circle cx="12" cy="12" r="3.6" fill="#3A2814"/><g fill="rgba(255,255,255,0.25)"><circle cx="11" cy="11" r="0.5"/><circle cx="13" cy="11.5" r="0.5"/><circle cx="11.5" cy="13" r="0.5"/></g></svg>',
+
+  cobertura: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 22 Q12 16 8 13 Q4 11 5 6 Q10 8 12 14 Z"/><path d="M12 22 Q12 16 16 13 Q20 11 19 6 Q14 8 12 14 Z" opacity="0.7"/><line x1="12" y1="14" x2="12" y2="22" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/></svg>',
+
+  sorgo: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><line x1="12" y1="14" x2="12" y2="22" stroke="currentColor" stroke-width="1"/><line x1="12" y1="14" x2="6.5" y2="7" stroke="currentColor" stroke-width="0.8"/><line x1="12" y1="14" x2="9" y2="4.5" stroke="currentColor" stroke-width="0.8"/><line x1="12" y1="14" x2="12" y2="3" stroke="currentColor" stroke-width="0.8"/><line x1="12" y1="14" x2="15" y2="4.5" stroke="currentColor" stroke-width="0.8"/><line x1="12" y1="14" x2="17.5" y2="7" stroke="currentColor" stroke-width="0.8"/><circle cx="6.5" cy="7" r="1.4"/><circle cx="9" cy="4.5" r="1.4"/><circle cx="12" cy="3" r="1.4"/><circle cx="15" cy="4.5" r="1.4"/><circle cx="17.5" cy="7" r="1.4"/><circle cx="10" cy="9.5" r="1"/><circle cx="14" cy="9.5" r="1"/></svg>',
+
+  pastura: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M7 22 Q5.5 14 7 5 Q9 14 8 22 Z"/><path d="M12 22 Q10.5 12 13 3 Q14.5 12 13 22 Z"/><path d="M17 22 Q15.5 14 17 5 Q19 14 18 22 Z"/></svg>',
+
+  colza: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><line x1="12" y1="22" x2="12" y2="14" stroke="currentColor" stroke-width="1"/><circle cx="8.5" cy="6.5" r="1.6"/><circle cx="12" cy="4.5" r="1.9"/><circle cx="15.5" cy="6.5" r="1.6"/><circle cx="10.5" cy="9.5" r="1.4"/><circle cx="14" cy="9.5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><g fill="rgba(255,255,255,0.3)"><circle cx="12" cy="4.5" r="0.6"/><circle cx="8.5" cy="6.5" r="0.5"/><circle cx="15.5" cy="6.5" r="0.5"/></g></svg>',
+
+  arveja: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3 12 Q4 9 8 8.5 Q14 9 19 11 Q21 12 20 14 Q14 14 8 13.5 Q4 13 3 12 Z"/><circle cx="7.5" cy="11" r="1.2" fill="rgba(255,255,255,0.45)"/><circle cx="11" cy="11" r="1.3" fill="rgba(255,255,255,0.45)"/><circle cx="14.5" cy="11.5" r="1.3" fill="rgba(255,255,255,0.45)"/><circle cx="18" cy="12" r="1.1" fill="rgba(255,255,255,0.45)"/></svg>',
+
+  defaultCrop: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="12" cy="12" r="3"/></svg>'
+};
+
+const CULTIVO_SVG = {
+  'Soja': 'soja', 'Soja 1ra': 'soja', 'Soja 2da': 'soja', 'Soja Pastoreo': 'soja',
+  'Maíz': 'maiz', 'Maíz tardío': 'maiz', 'Maíz 2da': 'maiz', 'Maíz Pisingallo': 'maiz',
+  'Maíz baja tecnologia': 'maiz', 'Maíz Silo': 'maiz', 'Maíz Silo Tardío': 'maiz',
+  'Maíz Silo 2da': 'maiz',
+  'Trigo': 'espiga', 'Cebada': 'espiga', 'Cebada Silo': 'espiga',
+  'Cebada/Vicia Silo': 'espiga', 'Avena': 'espiga', 'Centeno': 'espiga',
+  'Rollo de Cebada': 'espiga',
+  'Girasol': 'girasol',
+  'Sorgo': 'sorgo', 'Sorgo Forrajero': 'sorgo', 'Sorgo Pastoreo': 'sorgo', 'Sorgo Silo': 'sorgo',
+  'Colza': 'colza',
+  'Cultivo de Cobertura': 'cobertura',
+  'Pastura': 'pastura', 'Pastura Implantación': 'pastura', 'Natural': 'pastura',
+  'Agropiro': 'pastura',
+  'Arveja': 'arveja',
+  '—': 'defaultCrop'
+};
+
+function cultivoColor(c) {
+  const k = cultivoKey(c);
+  return CULTIVO_COLORS_BY_KEY[k] || '#95A695';
+}
+
+// Formatea el nombre del cultivo agregando "cobertura" si aplica
+function cultivoConDestino(cultivo, destino) {
+  if (!cultivo) return '—';
+  if (destino && destino.toLowerCase() === 'cobertura') {
+    return cultivo + ' cobertura';
+  }
+  return cultivo;
+}
+
+function cultivoSvg(c, size) {
+  const key = cultivoKey(c);
+  let svg = SVG_ICONS[key] || SVG_ICONS.defaultCrop;
+  if (size) svg = svg.replace('width="20" height="20"', `width="${size}" height="${size}"`);
+  return svg;
+}
+
+// Normaliza cualquier nombre de cultivo a una clave canónica
+function cultivoKey(c) {
+  if (!c || c === '—') return 'defaultCrop';
+  const s = c.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  if (s.includes('maiz') && s.includes('silo')) return 'maiz';
+  if (s.includes('maiz')) return 'maiz';
+  if (s.includes('soja')) return 'soja';
+  if (s.includes('girasol')) return 'girasol';
+  if (s.includes('trigo') || s.includes('cebada') || s.includes('avena') || s.includes('centeno') || s.includes('vicia')) return 'espiga';
+  if (s.includes('sorgo')) return 'sorgo';
+  if (s.includes('cobertura')) return 'cobertura';
+  if (s.includes('pastura') || s.includes('natural') || s.includes('agropiro')) return 'pastura';
+  if (s.includes('colza')) return 'colza';
+  if (s.includes('arveja')) return 'arveja';
+  return 'defaultCrop';
+}
+
+// Colores por clave canónica
+const CULTIVO_COLORS_BY_KEY = {
+  'maiz':       '#C49340',
+  'soja':       '#5E8541',
+  'girasol':    '#E0A030',
+  'espiga':     '#C8A858',
+  'sorgo':      '#A85A3D',
+  'cobertura':  '#4F6B36',
+  'pastura':    '#7A8B5C',
+  'colza':      '#E5C040',
+  'arveja':     '#7BA354',
+  'defaultCrop':'#95A695'
+};
+
+function parseDate(s) {
+  if (!s) return null;
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function formatDateShort(s) {
+  const d = parseDate(s);
+  if (!d) return '—';
+  return d.getDate() + ' ' + MESES[d.getMonth()].toLowerCase() + ' ' + d.getFullYear();
+}
+
+function formatDateNumeric(s) {
+  const d = parseDate(s);
+  if (!d) return '—';
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  return dd + '/' + mm + '/' + d.getFullYear();
+}
+
+function formatDateParts(s) {
+  const d = parseDate(s);
+  if (!d) return { dia: '—', mes: '—', anio: '' };
+  return { dia: d.getDate(), mes: MESES[d.getMonth()], anio: d.getFullYear() };
+}
+
+function diffDays(s) {
+  const d = parseDate(s);
+  if (!d) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  return Math.round((today - d) / (1000 * 60 * 60 * 24));
+}
+
+function diasBadgeClass(dias) {
+  if (dias === null || dias === undefined) return 'ninguno';
+  if (dias < 0) return 'futuro';
+  if (dias <= 30) return 'reciente';
+  if (dias <= 90) return 'medio';
+  return 'viejo';
+}
+
+function diasText(dias) {
+  if (dias === null || dias === undefined) return '—';
+  if (dias === 0) return 'hoy';
+  if (dias === 1) return 'ayer';
+  if (dias === -1) return 'mañana';
+  if (dias < 0) return 'en ' + Math.abs(dias) + 'd';
+  return 'hace ' + dias + 'd';
+}
+
+function ultimaPorTipo(lote, tipo) {
+  const ordenes = (lote.ordenes_trabajo || []).filter(o => o.tipo_labor === tipo);
+  if (ordenes.length === 0) return null;
+  return ordenes.reduce((a, b) => parseDate(a.fecha) > parseDate(b.fecha) ? a : b);
+}
+
+function ultimaOrden(lote) {
+  if (!lote.ordenes_trabajo || lote.ordenes_trabajo.length === 0) return null;
+  return lote.ordenes_trabajo.reduce((a, b) =>
+    (parseDate(a.fecha) > parseDate(b.fecha)) ? a : b
+  );
+}
+
+// Analiza si un conjunto de ambientes comparte producto+dosis o varía
+function analizar(ambientes, productoKey, dosisKey, unidad) {
+  const items = ambientes
+    .map(a => ({ p: a[productoKey], d: a[dosisKey] }))
+    .filter(i => i.p && i.p !== '' && i.p !== 'nan');
+  if (items.length === 0) return null;
+
+  const productos = [...new Set(items.map(i => i.p))];
+  const dosis = items.map(i => i.d).filter(d => d != null && !isNaN(d));
+
+  if (productos.length === 1) {
+    const dosisUnicas = [...new Set(dosis)];
+    if (dosisUnicas.length === 1) {
+      return { uniforme: true, producto: productos[0], dosis: dosis[0], unidad };
+    } else if (dosisUnicas.length > 1) {
+      const prom = Math.round(dosis.reduce((s,d) => s+d, 0) / dosis.length);
+      return { promedio: true, producto: productos[0], dosis: prom, unidad,
+               min: Math.min(...dosis), max: Math.max(...dosis) };
+    } else {
+      return { uniforme: true, producto: productos[0], dosis: null, unidad };
+    }
+  }
+  return { variable: true };
+}
+
+// Agrupa ambientes por cultivo y detecta qué datos son comunes a todos
+function analizarAmbientes(ambientes) {
+  if (!ambientes || ambientes.length === 0) {
+    return { grupos_cultivo: [], fert_p: null, semillero: null };
+  }
+
+  // 1) Agrupar por cultivo+destino, sumando hectáreas
+  const porCultivo = {};
+  ambientes.forEach(a => {
+    const c = a.cultivo || '—';
+    const key = c + '|' + (a.destino || '');
+    if (!porCultivo[key]) {
+      porCultivo[key] = {
+        cultivo: c,
+        destino: a.destino || '',
+        nombre: cultivoConDestino(c, a.destino),
+        superficie: 0, n: 0
+      };
+    }
+    porCultivo[key].superficie += a.superficie || 0;
+    porCultivo[key].n++;
+  });
+  const grupos_cultivo = Object.values(porCultivo).sort((a,b) => b.superficie - a.superficie);
+
+  // 1.b) Agrupar por genética (incluyendo fechas de siembra)
+  const porGenetica = {};
+  ambientes.forEach(a => {
+    const g = (a.genetica && a.genetica !== '') ? a.genetica : 'Sin definir';
+    if (!porGenetica[g]) porGenetica[g] = { genetica: g, superficie: 0, n: 0, fechas: [] };
+    porGenetica[g].superficie += a.superficie || 0;
+    porGenetica[g].n++;
+    if (a.fecha_siembra) porGenetica[g].fechas.push(a.fecha_siembra);
+  });
+  const grupos_genetica = Object.values(porGenetica).sort((a,b) => b.superficie - a.superficie);
+
+  // 1.c) Detectar si hay algún ambiente con Maíz o Girasol (para mostrar densidad)
+  const requiereDensidad = ambientes.some(a => {
+    const k = cultivoKey(a.cultivo);
+    return k === 'maiz' || k === 'girasol';
+  });
+
+  return {
+    grupos_cultivo,
+    grupos_genetica,
+    requiere_densidad: requiereDensidad,
+    fert_p: analizar(ambientes, 'fertilizante_p', 'dosis_fert_p', 'kg/ha'),
+    fert_n: analizar(ambientes, 'fertilizante_n', 'dosis_fert_n', 'kg/ha'),
+  };
+}
+
+function formatFertResumen(info) {
+  if (!info) return null;
+  if (info.variable) return 'Variable';
+  if (info.uniforme) {
+    return info.producto + (info.dosis != null ? ' · ' + info.dosis + ' ' + info.unidad : '');
+  }
+  if (info.promedio) {
+    return info.producto + ' · prom. ' + info.dosis + ' ' + info.unidad;
+  }
+  return null;
+}
+
+// =============== Estado de filtros ===============
+const state = {
+  view: 'lotes',
+  filter: { campana: '', est: '', cultivo: '', tipo: '' }
+};
+
+// =============== Init ===============
+function init() {
+  document.getElementById('updated-date').textContent = DATA.generado_en;
+  populateFilters();
+  renderAll();
+  computeKPIs();
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.view = btn.dataset.view;
+      document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.view').forEach(v => {
+        v.classList.toggle('active', v.id === 'view-' + state.view);
+      });
+    });
+  });
+
+  // Filtros
+  document.getElementById('filter-campana').addEventListener('change', e => { state.filter.campana = e.target.value; renderAll(); });
+  document.getElementById('filter-est').addEventListener('change', e => { state.filter.est = e.target.value; renderAll(); });
+  document.getElementById('filter-cultivo').addEventListener('change', e => { state.filter.cultivo = e.target.value; renderAll(); });
+  document.getElementById('filter-tipo').addEventListener('change', e => { state.filter.tipo = e.target.value; renderAll(); });
+  document.getElementById('filter-clear').addEventListener('click', () => {
+    state.filter = { campana: '', est: '', cultivo: '', tipo: '' };
+    document.querySelectorAll('.filter-select').forEach(s => s.value = '');
+    renderAll();
+  });
+
+  // Modal
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-backdrop').addEventListener('click', e => {
+    if (e.target.id === 'modal-backdrop') closeModal();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+}
+
+function populateFilters() {
+  // Recolectar campañas de ambas fuentes (órdenes + planificación)
+  const campanasSet = new Set();
+  DATA.ordenes_trabajo.forEach(o => { if (o.campaña) campanasSet.add(o.campaña); });
+  DATA.lotes.forEach(l => {
+    if (l.campaña_planificada) campanasSet.add(l.campaña_planificada);
+  });
+  // Ordenar campañas (formato XX-YY) descendente
+  const campanas = [...campanasSet].sort((a, b) => b.localeCompare(a));
+
+  const selCampana = document.getElementById('filter-campana');
+  campanas.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = 'Campaña ' + c;
+    selCampana.appendChild(opt);
+  });
+
+  const ests = [...new Set(DATA.lotes.map(l => l.establecimiento))].sort();
+  const selEst = document.getElementById('filter-est');
+  ests.forEach(e => {
+    const opt = document.createElement('option');
+    opt.value = e;
+    opt.textContent = e.replace('_', ' ');
+    selEst.appendChild(opt);
+  });
+
+  const cultivos = [...new Set(DATA.lotes.map(l => l.cultivo_actual).filter(Boolean))].sort();
+  const selCult = document.getElementById('filter-cultivo');
+  cultivos.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    selCult.appendChild(opt);
+  });
+
+  const tipos = [...new Set(DATA.ordenes_trabajo.map(o => o.tipo_labor))].sort();
+  const selTipo = document.getElementById('filter-tipo');
+  tipos.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = t;
+    selTipo.appendChild(opt);
+  });
+}
+
+function computeKPIs() {
+  const { lotes, ordenes } = applyFilters(DATA.lotes, DATA.ordenes_trabajo);
+  const supTotal = lotes.reduce((s, l) => s + (l.superficie || 0), 0);
+  const cultivosUnicos = new Set(lotes.map(l => l.cultivo_actual).filter(Boolean));
+  const estUnicos = new Set(lotes.map(l => l.establecimiento));
+
+  document.getElementById('kpi-lotes').textContent = lotes.length;
+  document.getElementById('kpi-ha').innerHTML = Math.round(supTotal) + '<span class="unit">ha</span>';
+  document.getElementById('kpi-cultivos').textContent = cultivosUnicos.size + ' cultivos distintos';
+  document.getElementById('kpi-est').textContent = estUnicos.size;
+}
+
+function applyFilters(lotes, ordenes) {
+  const f = state.filter;
+  const showClear = f.campana || f.est || f.cultivo || f.tipo;
+  document.getElementById('filter-clear').style.display = showClear ? 'inline' : 'none';
+
+  let filteredLotes = lotes.filter(l => {
+    if (f.est && l.establecimiento !== f.est) return false;
+    if (f.cultivo && l.cultivo_actual !== f.cultivo) return false;
+    if (f.campana) {
+      const tieneCampana = (l.ordenes_trabajo || []).some(o => o.campaña === f.campana) ||
+                          l.campaña_planificada === f.campana;
+      if (!tieneCampana) return false;
+    }
+    if (f.tipo) {
+      const tieneTipo = (l.ordenes_trabajo || []).some(o => o.tipo_labor === f.tipo);
+      if (!tieneTipo) return false;
+    }
+    return true;
+  });
+
+  let filteredOrdenes = ordenes.filter(o => {
+    if (f.campana && o.campaña !== f.campana) return false;
+    if (f.est && o.establecimiento !== f.est) return false;
+    if (f.cultivo && o.cultivo !== f.cultivo) return false;
+    if (f.tipo && o.tipo_labor !== f.tipo) return false;
+    return true;
+  });
+
+  return { lotes: filteredLotes, ordenes: filteredOrdenes };
+}
+
+function renderAll() {
+  const { lotes, ordenes } = applyFilters(DATA.lotes, DATA.ordenes_trabajo);
+  document.getElementById('count-lotes').textContent = lotes.length;
+  document.getElementById('count-trat').textContent = ordenes.length;
+  renderLotes(lotes);
+  renderTratamientos(ordenes);
+  computeKPIs();
+}
+
+// =============== Render Lotes ===============
+const TIPOS_LABOR = ['Siembra', 'Fertilización', 'Pulverización', 'Cosecha'];
+
+function detalleLabor(orden) {
+  if (!orden || !orden.items) return '';
+  // Filtrar productos relevantes (no coadyuvantes ni el "pulvT" placeholder)
+  const principales = orden.items
+    .filter(i => i.tipo && i.tipo !== 'Coadyuvante' && i.tipo !== 'Labor')
+    .map(i => i.producto);
+  if (principales.length === 0) return '';
+  if (principales.length <= 2) return principales.join(' · ');
+  return principales.slice(0, 2).join(' · ') + ' + ' + (principales.length - 2);
+}
+
+function renderLotes(lotes) {
+  const grid = document.getElementById('lotes-grid');
+  if (lotes.length === 0) {
+    grid.innerHTML = '<div class="empty"><div class="empty-title">Sin resultados</div><div class="empty-sub">Probá quitando algún filtro</div></div>';
+    return;
+  }
+
+  const byEst = {};
+  lotes.forEach(l => { (byEst[l.establecimiento] = byEst[l.establecimiento] || []).push(l); });
+
+  let html = '';
+  Object.keys(byEst).sort().forEach(est => {
+    html += '<div style="grid-column: 1/-1;" class="section-label">' + est.replace('_', ' ') + ' &nbsp;·&nbsp; ' + byEst[est].length + ' lotes</div>';
+
+    byEst[est].sort((a, b) => a.lote.localeCompare(b.lote)).forEach(l => {
+      const cultivo = l.cultivo_actual || '—';
+      const cultivoNombre = cultivoConDestino(cultivo, l.destino_actual);
+      const color = cultivoColor(cultivo);
+
+      // Si tiene ambientes, generar lista compacta agrupada por cultivo
+      let ambientesHtml = '';
+      let analisis = null;
+      if (l.tiene_ambientes && l.ambientes && l.ambientes.length > 0) {
+        analisis = analizarAmbientes(l.ambientes);
+        ambientesHtml = '<div class="ambientes-mini">';
+        analisis.grupos_cultivo.forEach(g => {
+          const cColor = cultivoColor(g.cultivo);
+          ambientesHtml += `
+            <div class="ambiente-mini-row">
+              <span class="ambiente-mini-cultivo">
+                <span style="color: ${cColor}; display:inline-flex;">${cultivoSvg(g.cultivo, 14)}</span>
+                ${g.nombre}
+              </span>
+              <span class="ambiente-mini-sup">${g.superficie.toFixed(1).replace(/\.0$/, '')} ha</span>
+            </div>
+          `;
+        });
+        ambientesHtml += '</div>';
+      }
+
+      // Buscar última labor de cada tipo
+      let laboresHtml = '';
+      let totalLabores = 0;
+      TIPOS_LABOR.forEach(tipo => {
+        const ult = ultimaPorTipo(l, tipo);
+        if (!ult) return;
+        totalLabores++;
+        const dias = diffDays(ult.fecha);
+        const detalle = detalleLabor(ult);
+        laboresHtml += `
+          <div class="labor-row">
+            <div class="labor-tipo">${tipo}</div>
+            <div class="labor-fecha">${formatDateNumeric(ult.fecha)}</div>
+            <div class="labor-badge"><span class="dias-badge ${diasBadgeClass(dias)}">${diasText(dias)}</span></div>
+            ${detalle ? `<div class="labor-detalle">${detalle}</div>` : ''}
+          </div>
+        `;
+      });
+
+      // Si no hay ninguna labor, mostrar planificación si existe
+      if (totalLabores === 0) {
+        if (l.fecha_siembra_planificada || l.genetica) {
+          laboresHtml = `
+            <div class="labor-row">
+              <div class="labor-tipo">Planificado</div>
+              <div class="labor-fecha">${l.fecha_siembra_planificada ? formatDateNumeric(l.fecha_siembra_planificada) : '—'}</div>
+              <div class="labor-badge"><span class="dias-badge futuro">siembra</span></div>
+              ${l.genetica ? `<div class="labor-detalle">${l.genetica}${l.fertilizante_p ? ' · ' + l.fertilizante_p : ''}</div>` : ''}
+            </div>
+          `;
+        } else {
+          laboresHtml = '<div class="labores-empty">Sin labores cargadas<span class="small">cuando se carguen aparecerán acá</span></div>';
+        }
+      }
+
+      // Indicador de ambientes en lugar de ambiente único
+      let cultivoRowExtra = '';
+      if (l.tiene_ambientes) {
+        cultivoRowExtra = `<span class="ambientes-badge">${l.n_ambientes} ambientes</span>`;
+      } else if (l.ambientes && l.ambientes.length === 1 && l.ambientes[0].ambiente) {
+        cultivoRowExtra = `<span class="ambiente-tag">${l.ambientes[0].ambiente}</span>`;
+      }
+
+      html += `
+        <div class="lote-card" style="--cultivo-color: ${color}" data-est="${est}" data-lote="${l.lote}">
+          <div class="lote-head">
+            <div>
+              <div class="lote-codigo">${l.lote}</div>
+              <div class="lote-establecimiento">${est.replace('_',' ')}</div>
+            </div>
+            <div class="lote-superficie">${l.superficie || 0}<span class="unit">ha</span></div>
+          </div>
+          <div class="lote-cultivo-row">
+            <span class="cultivo-icon" style="color: ${color}">${cultivoSvg(cultivo, 22)}</span>
+            <span class="cultivo-nombre">${cultivoNombre}</span>
+            ${cultivoRowExtra}
+          </div>
+          ${ambientesHtml}
+          <div class="labores-list">${laboresHtml}</div>
+        </div>
+      `;
+    });
+  });
+
+  grid.innerHTML = html;
+  grid.querySelectorAll('.lote-card').forEach(card => {
+    card.addEventListener('click', () => {
+      openLoteModal(card.dataset.est, card.dataset.lote);
+    });
+  });
+}
+
+// =============== Render Tratamientos ===============
+function renderTratamientos(ordenes) {
+  const cont = document.getElementById('tratamientos-list');
+  if (ordenes.length === 0) {
+    cont.innerHTML = '<div class="empty"><div class="empty-title">Sin tratamientos</div><div class="empty-sub">Probá ajustando los filtros</div></div>';
+    return;
+  }
+
+  let html = '';
+  ordenes.forEach((o, idx) => {
+    const fp = formatDateParts(o.fecha);
+    const tipoClass = (o.tipo_labor || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const colorCultivo = cultivoColor(o.cultivo);
+    html += `
+      <div class="tratamiento-card" data-idx="${idx}">
+        <div class="tratamiento-header">
+          <div class="tratamiento-fecha-block">
+            <div class="fecha-dia">${fp.dia}</div>
+            <div class="fecha-mes">${fp.mes}</div>
+            <div class="fecha-anio">${fp.anio}</div>
+          </div>
+          <div class="tratamiento-info-main">
+            <div class="tratamiento-titulo">
+              <span class="codigo">${o.lote}</span>
+              <span class="establecimiento">· ${o.establecimiento.replace('_',' ')}</span>
+            </div>
+            <div class="tratamiento-meta">
+              <span class="labor-tag ${tipoClass}">${o.tipo_labor}</span>
+              <span class="cultivo-with-icon" style="color: ${colorCultivo}">
+                ${cultivoSvg(o.cultivo, 16)}<span style="color: var(--ink-3)">${o.cultivo}</span>
+              </span>
+              <span>${o.superficie} ha</span>
+              <span>${o.n_productos} ${o.n_productos === 1 ? 'producto' : 'productos'}</span>
+            </div>
+          </div>
+          <div class="expand-icon">›</div>
+        </div>
+        <div class="tratamiento-body">
+          ${renderItemsTable(o.items)}
+        </div>
+      </div>
+    `;
+  });
+
+  cont.innerHTML = html;
+  cont.querySelectorAll('.tratamiento-header').forEach(h => {
+    h.addEventListener('click', () => h.parentElement.classList.toggle('expanded'));
+  });
+}
+
+function renderItemsTable(items) {
+  if (!items || items.length === 0) return '<p style="padding: 12px 0; color: var(--ink-3);">Sin productos cargados</p>';
+  let rows = '';
+  items.forEach(i => {
+    const tipoClass = (i.tipo || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    rows += `
+      <tr>
+        <td>
+          <div class="producto-cell">${i.producto}</div>
+        </td>
+        <td><span class="tipo-pill ${tipoClass}">${i.tipo}</span></td>
+        <td class="dosis-cell">${i.dosis !== null ? i.dosis : '—'} ${i.unidad || ''}</td>
+        <td class="total-cell col-total">${i.total !== null ? i.total.toFixed(1) : '—'}</td>
+      </tr>
+    `;
+  });
+  return `
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th class="col-pa">Tipo</th>
+          <th style="text-align:right;">Dosis/ha</th>
+          <th class="col-total" style="text-align:right;">Total</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+// =============== Render Cronología ===============
+function renderCronologia(ordenes) {
+  const cont = document.getElementById('timeline');
+  if (ordenes.length === 0) {
+    cont.innerHTML = '<div class="empty"><div class="empty-title">Sin labores</div></div>';
+    return;
+  }
+
+  let html = '';
+  ordenes.forEach(o => {
+    const tipoClass = (o.tipo_labor || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const principales = (o.items || []).filter(i => i.tipo !== 'Labor' && i.tipo !== 'Coadyuvante').slice(0, 3).map(i => i.producto).join(' · ');
+    html += `
+      <div class="timeline-item ${tipoClass}">
+        <div class="timeline-fecha">${formatDateShort(o.fecha)} · ${diasText(diffDays(o.fecha))}</div>
+        <div class="timeline-titulo">${o.tipo_labor} en ${o.lote}</div>
+        <div class="timeline-desc">
+          ${o.establecimiento.replace('_',' ')} · ${o.cultivo} · ${o.superficie} ha
+          ${principales ? '<br>' + principales : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  cont.innerHTML = html;
+}
+
+// =============== Modal ===============
+function openLoteModal(est, loteCode) {
+  const lote = DATA.lotes.find(l => l.establecimiento === est && l.lote === loteCode);
+  if (!lote) return;
+
+  const inner = document.getElementById('modal-inner');
+  const cultivo = lote.cultivo_actual || '—';
+  const cultivoNombre = cultivoConDestino(cultivo, lote.destino_actual);
+  const color = cultivoColor(cultivo);
+
+  let ordenesHtml = '';
+  if (lote.ordenes_trabajo && lote.ordenes_trabajo.length > 0) {
+    lote.ordenes_trabajo.forEach(o => {
+      ordenesHtml += `
+        <div class="orden-mini">
+          <div class="orden-mini-head">
+            <span class="orden-mini-fecha">${formatDateShort(o.fecha)} · ${o.tipo_labor}</span>
+            <span class="dias-badge ${diasBadgeClass(diffDays(o.fecha))}">${diasText(diffDays(o.fecha))}</span>
+          </div>
+          <div class="orden-mini-items">
+            ${o.items.map(i => `
+              <div class="producto-line">
+                <span>${i.producto}</span>
+                <span class="dosis-mini">${i.dosis !== null ? i.dosis : ''} ${i.unidad || ''}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    });
+  } else {
+    ordenesHtml = '<p style="color: var(--ink-3); font-style: italic; padding: 12px 0;">No hay órdenes de trabajo registradas para este lote.</p>';
+  }
+
+  // Análisis de ambientes para detectar comunes vs variables
+  const analisis = lote.tiene_ambientes ? analizarAmbientes(lote.ambientes) : null;
+  const fertPResumen = analisis ? formatFertResumen(analisis.fert_p) : null;
+  const fertNResumen = analisis ? formatFertResumen(analisis.fert_n) : null;
+
+  let planificacionHtml = '';
+
+  // Si tiene ambientes múltiples, mostrar 2 secciones
+  if (lote.tiene_ambientes && lote.ambientes && lote.ambientes.length > 0) {
+
+    // === Sección 1: Superficie por genética ===
+    if (analisis.grupos_genetica && analisis.grupos_genetica.length > 0) {
+      // Helper para resumir fechas de un grupo
+      function resumenFechas(fechas) {
+        if (!fechas || fechas.length === 0) return '—';
+        const unicas = [...new Set(fechas)].sort();
+        if (unicas.length === 1) return formatDateShort(unicas[0]);
+        // Rango: primera y última
+        return formatDateShort(unicas[0]) + ' – ' + formatDateShort(unicas[unicas.length - 1]);
+      }
+      let rowsGen = '';
+      analisis.grupos_genetica.forEach(g => {
+        rowsGen += `
+          <tr>
+            <td style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--ink); padding: 12px 10px 12px 0;">${g.genetica}</td>
+            <td class="amb-sup">${g.superficie.toFixed(1).replace(/\.0$/,'')} ha</td>
+            <td class="amb-extra">${resumenFechas(g.fechas)}</td>
+          </tr>
+        `;
+      });
+      planificacionHtml += `
+        <div class="modal-section-title">Superficie por genética</div>
+        <table class="ambientes-table">
+          <thead>
+            <tr>
+              <th>Genética</th>
+              <th style="text-align:right;">Superficie</th>
+              <th>Fecha de siembra</th>
+            </tr>
+          </thead>
+          <tbody>${rowsGen}</tbody>
+        </table>
+      `;
+    }
+
+    // === Sección 2: Ambientación ===
+    // Agrupar por nombre de ambiente (Media Loma 2 puede aparecer 2 veces con cultivos distintos)
+    const ambientesAgrupados = {};
+    lote.ambientes.forEach(amb => {
+      const key = amb.ambiente || '—';
+      if (!ambientesAgrupados[key]) {
+        ambientesAgrupados[key] = { ambiente: key, sub: [] };
+      }
+      ambientesAgrupados[key].sub.push(amb);
+    });
+
+    // Para cada grupo, calcular: superficie total, y resumir Fert N / Fert P / Densidad
+    const ambientesFinales = Object.values(ambientesAgrupados).map(g => {
+      const supTotal = g.sub.reduce((s, a) => s + (a.superficie || 0), 0);
+      const fertN = analizar(g.sub, 'fertilizante_n', 'dosis_fert_n', 'kg/ha');
+      const fertP = analizar(g.sub, 'fertilizante_p', 'dosis_fert_p', 'kg/ha');
+      // Densidad: solo si algún cultivo del grupo es maíz/girasol
+      const subConDensidad = g.sub.filter(a => {
+        const k = cultivoKey(a.cultivo);
+        return (k === 'maiz' || k === 'girasol') && a.densidad_recomendada;
+      });
+      let densidad = '—';
+      if (subConDensidad.length > 0) {
+        const valores = subConDensidad.map(a => a.densidad_recomendada);
+        const unicos = [...new Set(valores)];
+        if (unicos.length === 1) densidad = valores[0] + ' pl/m²';
+        else densidad = Math.round(valores.reduce((s,v)=>s+v,0)/valores.length) + ' pl/m²';
+      }
+      return { ambiente: g.ambiente, superficie: supTotal, fert_n: fertN, fert_p: fertP, densidad };
+    });
+
+    // Determinar qué columnas mostrar
+    const showFertP = analisis.fert_p && (analisis.fert_p.variable || analisis.fert_p.promedio);
+    const showDensidad = analisis.requiere_densidad;
+
+    let headerCols = '<th>Ambiente</th><th style="text-align:right;">Sup.</th><th>Fert. nitrógeno</th>';
+    if (showFertP) headerCols += '<th>Fert. fósforo</th>';
+    if (showDensidad) headerCols += '<th style="text-align:right;">Densidad</th>';
+
+    function fertCellText(info) {
+      if (!info) return '—';
+      if (info.variable) return 'Variable';
+      if (info.uniforme) {
+        return info.producto + (info.dosis != null ? ' · ' + info.dosis + ' kg/ha' : '');
+      }
+      if (info.promedio) {
+        return info.producto + ' · prom. ' + info.dosis + ' kg/ha';
+      }
+      return '—';
+    }
+
+    let rowsAmb = '';
+    ambientesFinales.forEach(amb => {
+      let row = `
+        <td class="amb-nombre">${amb.ambiente}</td>
+        <td class="amb-sup">${amb.superficie.toFixed(1).replace(/\.0$/,'')} ha</td>
+        <td class="amb-extra">${fertCellText(amb.fert_n)}</td>
+      `;
+      if (showFertP) row += `<td class="amb-extra">${fertCellText(amb.fert_p)}</td>`;
+      if (showDensidad) row += `<td class="amb-extra" style="text-align:right; font-family: 'JetBrains Mono', monospace;">${amb.densidad}</td>`;
+      rowsAmb += `<tr>${row}</tr>`;
+    });
+
+    planificacionHtml += `
+      <div class="modal-section-title">Ambientación · ${ambientesFinales.length} ambientes</div>
+      <table class="ambientes-table">
+        <thead><tr>${headerCols}</tr></thead>
+        <tbody>${rowsAmb}</tbody>
+      </table>
+    `;
+
+  } else if (lote.fecha_siembra_planificada || lote.semillero || lote.genetica || lote.fertilizante_p) {
+    // Lote sin ambientes pero con planificación general
+    planificacionHtml = `
+      <div class="modal-section-title">Planificación campaña ${lote.campaña_planificada || ''}</div>
+      <dl class="planificacion-row">
+        ${lote.fecha_siembra_planificada ? `<dt>Fecha siembra</dt><dd>${formatDateShort(lote.fecha_siembra_planificada)}</dd>` : ''}
+        ${lote.semillero ? `<dt>Semillero</dt><dd>${lote.semillero}</dd>` : ''}
+        ${lote.genetica ? `<dt>Genética</dt><dd>${lote.genetica}</dd>` : ''}
+        ${lote.fertilizante_p ? `<dt>Fert. fósforo</dt><dd>${lote.fertilizante_p}${lote.dosis_fert_p ? ' · ' + lote.dosis_fert_p + ' kg/ha' : ''}</dd>` : ''}
+        ${lote.fertilizante_n ? `<dt>Fert. nitrógeno</dt><dd>${lote.fertilizante_n}${lote.dosis_fert_n ? ' · ' + Math.round(lote.dosis_fert_n) + ' kg/ha' : ''}</dd>` : ''}
+      </dl>
+    `;
+  }
+
+  inner.innerHTML = `
+    <div class="modal-header" style="border-left: 3px solid ${color}; padding-left: 16px;">
+      <div class="modal-codigo">${lote.lote}</div>
+      <div class="modal-establecimiento">${est.replace('_',' ')}</div>
+      <div class="modal-stats">
+        <div class="modal-stat">
+          <div class="modal-stat-label">Cultivo</div>
+          <div class="modal-stat-value" style="display:flex; align-items:center; gap:6px;">
+            <span style="color: ${color}; display:inline-flex;">${cultivoSvg(cultivo, 18)}</span>
+            ${cultivoNombre}
+          </div>
+        </div>
+        <div class="modal-stat">
+          <div class="modal-stat-label">Superficie</div>
+          <div class="modal-stat-value">${lote.superficie || '—'} <span class="small">ha</span></div>
+        </div>
+        ${lote.antecesor && lote.antecesor !== '—' ? `
+          <div class="modal-stat">
+            <div class="modal-stat-label">Antecesor</div>
+            <div class="modal-stat-value">${lote.antecesor}</div>
+          </div>` : ''}
+        ${fertPResumen ? `
+          <div class="modal-stat">
+            <div class="modal-stat-label">Fert. fósforo</div>
+            <div class="modal-stat-value" style="font-size: 14px;">${fertPResumen}</div>
+          </div>` : ''}
+      </div>
+    </div>
+
+    ${planificacionHtml}
+
+    <div class="modal-section-title">Órdenes de trabajo · ${(lote.ordenes_trabajo || []).length}</div>
+    ${ordenesHtml}
+  `;
+
+  document.getElementById('modal-backdrop').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// =============== PRONÓSTICO DEL TIEMPO ===============
+// Coordenadas de La Madrugada — Oeste de Buenos Aires
+const WEATHER_CONFIG = {
+  lat: -36.2681,
+  lon: -62.7606,
+  nombre: 'La Madrugada'
+};
+
+const DIAS_SEMANA = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
+const MESES_CORTOS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+init();
+loadWeather();
+
+// SVG icons por código WMO de Open-Meteo
+// https://open-meteo.com/en/docs#weathervariables
+function weatherSvg(code, isDay) {
+  // Soleado
+  if (code === 0) return `<svg viewBox="0 0 32 32" width="32" height="32"><circle cx="16" cy="16" r="6" fill="#E5A845"/><g stroke="#E5A845" stroke-width="1.8" stroke-linecap="round"><line x1="16" y1="3" x2="16" y2="6"/><line x1="16" y1="26" x2="16" y2="29"/><line x1="3" y1="16" x2="6" y2="16"/><line x1="26" y1="16" x2="29" y2="16"/><line x1="7" y1="7" x2="9" y2="9"/><line x1="23" y1="23" x2="25" y2="25"/><line x1="7" y1="25" x2="9" y2="23"/><line x1="23" y1="9" x2="25" y2="7"/></g></svg>`;
+  // Parcialmente nublado
+  if (code === 1 || code === 2) return `<svg viewBox="0 0 32 32" width="32" height="32"><circle cx="11" cy="12" r="5" fill="#E5A845"/><path d="M 9 22 Q 6 22 6 19 Q 6 17 9 17 Q 10 13 14 13 Q 19 13 20 17 Q 24 17 24 21 Q 24 24 21 24 L 10 24 Q 9 24 9 22 Z" fill="#B5B5B0" stroke="#8B8B85" stroke-width="0.8"/></svg>`;
+  // Nublado
+  if (code === 3) return `<svg viewBox="0 0 32 32" width="32" height="32"><path d="M 8 20 Q 5 20 5 17 Q 5 15 8 15 Q 9 11 13 11 Q 18 11 19 15 Q 23 15 23 19 Q 23 22 20 22 L 9 22 Q 8 22 8 20 Z" fill="#B5B5B0" stroke="#7B7B75" stroke-width="0.8"/><path d="M 14 24 Q 11 24 11 21 Q 11 19 14 19 Q 15 15 19 15 Q 24 15 25 19 Q 29 19 29 23 Q 29 26 26 26 L 15 26 Q 14 26 14 24 Z" fill="#9B9B95" stroke="#6B6B65" stroke-width="0.8"/></svg>`;
+  // Niebla
+  if (code === 45 || code === 48) return `<svg viewBox="0 0 32 32" width="32" height="32"><g stroke="#9B9B95" stroke-width="2" stroke-linecap="round" fill="none"><line x1="5" y1="11" x2="27" y2="11"/><line x1="3" y1="16" x2="22" y2="16"/><line x1="9" y1="21" x2="29" y2="21"/><line x1="5" y1="26" x2="25" y2="26"/></g></svg>`;
+  // Llovizna
+  if (code >= 51 && code <= 57) return `<svg viewBox="0 0 32 32" width="32" height="32"><path d="M 7 14 Q 4 14 4 11 Q 4 9 7 9 Q 8 5 12 5 Q 17 5 18 9 Q 22 9 22 13 Q 22 16 19 16 L 8 16 Q 7 16 7 14 Z" fill="#9B9B95"/><g stroke="#4A8BC2" stroke-width="1.5" stroke-linecap="round"><line x1="10" y1="20" x2="9" y2="24"/><line x1="16" y1="20" x2="15" y2="24"/><line x1="22" y1="20" x2="21" y2="24"/></g></svg>`;
+  // Lluvia
+  if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return `<svg viewBox="0 0 32 32" width="32" height="32"><path d="M 7 13 Q 4 13 4 10 Q 4 8 7 8 Q 8 4 12 4 Q 17 4 18 8 Q 22 8 22 12 Q 22 15 19 15 L 8 15 Q 7 15 7 13 Z" fill="#6B7B85"/><g stroke="#2A6BB2" stroke-width="2" stroke-linecap="round"><line x1="9" y1="19" x2="7" y2="26"/><line x1="14" y1="19" x2="12" y2="26"/><line x1="19" y1="19" x2="17" y2="26"/><line x1="24" y1="19" x2="22" y2="26"/></g></svg>`;
+  // Nieve
+  if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) return `<svg viewBox="0 0 32 32" width="32" height="32"><path d="M 7 13 Q 4 13 4 10 Q 4 8 7 8 Q 8 4 12 4 Q 17 4 18 8 Q 22 8 22 12 Q 22 15 19 15 L 8 15 Q 7 15 7 13 Z" fill="#9B9B95"/><g fill="#88AAD5" font-family="serif" font-size="10"><text x="8" y="26">❄</text><text x="16" y="26">❄</text><text x="22" y="24">❄</text></g></svg>`;
+  // Tormenta
+  if (code >= 95) return `<svg viewBox="0 0 32 32" width="32" height="32"><path d="M 7 13 Q 4 13 4 10 Q 4 8 7 8 Q 8 4 12 4 Q 17 4 18 8 Q 22 8 22 12 Q 22 15 19 15 L 8 15 Q 7 15 7 13 Z" fill="#4B4B45"/><path d="M 14 18 L 11 25 L 14 25 L 12 30 L 19 22 L 16 22 L 18 18 Z" fill="#E5A845" stroke="#A07020" stroke-width="0.5"/></svg>`;
+  return `<svg viewBox="0 0 32 32" width="32" height="32"><circle cx="16" cy="16" r="3" fill="#9B9B95"/></svg>`;
+}
+
+function windDirArrow(deg) {
+  // Flecha que indica HACIA dónde sopla el viento. El viento sopla DESDE 'deg', entonces va hacia (deg+180)
+  const direccion = (deg + 180) % 360;
+  return `<span class="weather-wind-arrow" style="transform: rotate(${direccion}deg); display:inline-block;">↑</span>`;
+}
+
+async function loadWeather() {
+  const cont = document.getElementById('weather-row');
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_CONFIG.lat}&longitude=${WEATHER_CONFIG.lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant&timezone=auto&forecast_days=10&wind_speed_unit=kmh`;
+  cont.innerHTML = '<div class="weather-loading">Cargando pronóstico…</div>';
+
+  // Timeout de 8 segundos para evitar que quede colgado si una extensión
+  // del navegador bloquea silenciosamente la petición
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const r = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!r.ok) throw new Error('La API respondió con código ' + r.status);
+    const data = await r.json();
+    renderWeather(data);
+  } catch (e) {
+    clearTimeout(timeoutId);
+    console.error('Error cargando pronóstico:', e);
+    const esFileProtocol = window.location.protocol === 'file:';
+    const esTimeout = e.name === 'AbortError';
+    cont.innerHTML = `
+      <div class="weather-error">
+        <div style="font-size: 13px; color: var(--ink-2); margin-bottom: 10px;">
+          ⚠ No se pudo cargar el pronóstico ${esTimeout ? '(timeout)' : ''}
+        </div>
+        ${esFileProtocol ? `
+          <div style="font-size: 12px; line-height: 1.6; max-width: 620px; margin: 0 auto; color: var(--ink-3); text-align: left;">
+            Estás abriendo el archivo directamente desde el disco (<code style="font-family: 'JetBrains Mono', monospace; background: var(--paper-3); padding: 1px 4px; border-radius: 3px;">file://</code>). Esto bloquea las llamadas al servicio de pronóstico, ya sea por restricciones del navegador o por una extensión instalada (AdGuard, uBlock, antivirus, etc.).
+            <br><br>
+            <strong style="color: var(--ink-2);">Solución definitiva — subir el archivo a un hosting (3 minutos, gratis):</strong>
+            <br>① Abrí <a href="https://app.netlify.com/drop" target="_blank" style="color: var(--olive); font-weight: 500;">app.netlify.com/drop</a>
+            <br>② Arrastrá el archivo HTML al recuadro de la página
+            <br>③ Te genera un link tipo <code style="font-family: 'JetBrains Mono', monospace; background: var(--paper-3); padding: 1px 4px;">https://nombre-aleatorio.netlify.app</code>
+            <br>④ Abrí ese link en cualquier navegador y el pronóstico carga
+            <br><br>
+            Ese mismo link te sirve para compartir la app con el dueño desde el celular o lo que sea.
+          </div>
+        ` : `
+          <div style="font-size: 12px; color: var(--ink-3);">Verificá tu conexión a internet o desactivá temporalmente extensiones de bloqueo. Detalle: ${e.message}</div>
+        `}
+        <button onclick="loadWeather()" style="margin-top: 14px; padding: 6px 14px; background: var(--paper); border: 1px solid var(--olive); border-radius: 4px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--olive);">Reintentar</button>
+      </div>
+    `;
+  }
+}
+
+function renderWeather(data) {
+  const cont = document.getElementById('weather-row');
+  const d = data.daily;
+  if (!d || !d.time) {
+    cont.innerHTML = `<div class="weather-error">Datos meteorológicos no disponibles.</div>`;
+    return;
+  }
+  let cardsHtml = '';
+  for (let i = 0; i < d.time.length && i < 10; i++) {
+    const fecha = new Date(d.time[i] + 'T00:00:00');
+    const isToday = i === 0;
+    const tMax = Math.round(d.temperature_2m_max[i]);
+    const tMin = Math.round(d.temperature_2m_min[i]);
+    const lluvia = d.precipitation_sum[i] || 0;
+    const probLluvia = d.precipitation_probability_max[i] || 0;
+    const viento = Math.round(d.wind_speed_10m_max[i]);
+    const dirViento = d.wind_direction_10m_dominant[i];
+    const code = d.weather_code[i];
+
+    const rainClass = lluvia < 0.5 ? 'dry' : '';
+    const windClass = viento > 40 ? 'fuerte' : '';
+
+    cardsHtml += `
+      <div class="weather-day ${isToday ? 'today' : ''}">
+        <div class="weather-dia">${isToday ? 'HOY' : DIAS_SEMANA[fecha.getDay()]}</div>
+        <div class="weather-fecha">${fecha.getDate()} ${MESES_CORTOS[fecha.getMonth()]}</div>
+        <div class="weather-icon">${weatherSvg(code, true)}</div>
+        <div class="weather-temps">
+          <span class="weather-tmax">${tMax}°</span>
+          <span class="weather-tmin">${tMin}°</span>
+        </div>
+        <div class="weather-rain ${rainClass}" title="${probLluvia}% probabilidad">
+          ${lluvia >= 0.5 ? `💧 ${lluvia.toFixed(lluvia < 10 ? 1 : 0)}mm` : '—'}
+        </div>
+        <div class="weather-wind ${windClass}">
+          ${windDirArrow(dirViento)} ${viento}
+        </div>
+      </div>
+    `;
+  }
+
+  cont.innerHTML = `
+    <div class="weather-header">
+      <span class="weather-label">Pronóstico 10 días</span>
+      <span class="weather-location">${WEATHER_CONFIG.nombre}</span>
+    </div>
+    <div class="weather-grid">${cardsHtml}</div>
+  `;
+}
+</script>
+
+</body>
+</html>
