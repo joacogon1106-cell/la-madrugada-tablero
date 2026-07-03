@@ -4,6 +4,9 @@ Script de automatización La Madrugada
 1. Se conecta a Dropbox usando refresh token (renueva access token solo)
 2. Descarga las dos planillas Excel
 3. Procesa los datos (cultivos, ambientes, órdenes de trabajo)
+   - Universo de lotes: SOLO los que están en planilla Agricultura
+   - Los tratamientos se filtran para incluir solo esos lotes
+   - Log de tratamientos ignorados por no corresponder a lote agrícola
 4. Genera el HTML actualizado y lo guarda como index.html
 
 Variables de entorno requeridas:
@@ -16,12 +19,13 @@ import sys
 import json
 import requests
 from datetime import datetime, timezone, timedelta
+from io import BytesIO
 
-# Zona horaria Argentina (UTC-3)
+# === Zona horaria Argentina (UTC-3) ===
 ARG_TZ = timezone(timedelta(hours=-3))
+
 def ahora_argentina():
     return datetime.now(ARG_TZ)
-from io import BytesIO
 
 # === Configuración ===
 DROPBOX_FOLDER = "/JG/TRABAJO/Clientes/La Madrugada/Agricultura La Madrugada"
@@ -76,7 +80,7 @@ def download_file(access_token, dropbox_path):
 
 
 # =========================================================================
-# 2. Procesamiento de datos (idéntico a procesar_datos_v2.py)
+# 2. Procesamiento de datos
 # =========================================================================
 def procesar_planillas(buf_cultivos, buf_agricultura):
     import pandas as pd
@@ -100,7 +104,7 @@ def procesar_planillas(buf_cultivos, buf_agricultura):
     df['Fecha'] = pd.to_datetime(df['Fecha'], errors='coerce')
     df['Fecha realizado'] = pd.to_datetime(df['Fecha realizado'], errors='coerce')
 
-    ordenes = []
+    ordenes_todas = []
     for (fecha, est, lote), grupo in df.groupby(['Fecha', 'Establecimiento', 'Lote'], dropna=False):
         primera = grupo.iloc[0]
         cultivo_abrev = str(primera['Actividad']).strip() if pd.notna(primera['Actividad']) else "."
@@ -128,7 +132,7 @@ def procesar_planillas(buf_cultivos, buf_agricultura):
                     "total": float(row['Total']) if pd.notna(row['Total']) else None,
                 })
 
-        ordenes.append({
+        ordenes_todas.append({
             "fecha": fecha.strftime("%Y-%m-%d") if pd.notna(fecha) else None,
             "fecha_realizado": primera['Fecha realizado'].strftime("%Y-%m-%d") if pd.notna(primera['Fecha realizado']) else None,
             "establecimiento": est,
@@ -146,7 +150,6 @@ def procesar_planillas(buf_cultivos, buf_agricultura):
             "real_presup": "",
             "observaciones": "",
         })
-    ordenes.sort(key=lambda x: x['fecha'] or '', reverse=True)
 
     # --- Planificación 26/27 por ambiente ---
     df_plan = pd.read_excel(buf_agricultura, sheet_name="Info")
@@ -154,12 +157,15 @@ def procesar_planillas(buf_cultivos, buf_agricultura):
     df_plan = df_plan[df_plan['Campo'].notna()]
 
     ambientes_por_lote = {}
+    lotes_agricolas = set()  # <-- UNIVERSO DE LOTES VÁLIDOS
+
     for _, row in df_plan.iterrows():
         campo = str(row['Campo']).strip() if pd.notna(row['Campo']) else ""
         lote = str(row['Lote']).strip() if pd.notna(row['Lote']) else ""
         if not campo or not lote:
             continue
         key = (campo, lote)
+        lotes_agricolas.add(key)  # marca este lote como válido
         ambientes_por_lote.setdefault(key, [])
         amb_nombre = str(row['Ambiente Regional RIDZO']).strip() if pd.notna(row['Ambiente Regional RIDZO']) else None
         ambientes_por_lote[key].append({
@@ -180,17 +186,38 @@ def procesar_planillas(buf_cultivos, buf_agricultura):
             "dosis_fert_n": float(row['Dosis 2']) if pd.notna(row['Dosis 2']) else None,
         })
 
-    # --- Construir lista de lotes ---
-    keys = set()
-    for o in ordenes:
-        keys.add((o['establecimiento'], o['lote']))
-    for k in ambientes_por_lote.keys():
-        keys.add(k)
+    # === FILTRAR ÓRDENES DE TRABAJO ===
+    # Solo mantener las órdenes cuyo (establecimiento, lote) esté en el universo agrícola
+    ordenes = []
+    ordenes_ignoradas = []
+    for o in ordenes_todas:
+        key = (o['establecimiento'], o['lote'])
+        if key in lotes_agricolas:
+            ordenes.append(o)
+        else:
+            ordenes_ignoradas.append(o)
 
+    # Log de tratamientos ignorados (para diagnóstico)
+    if ordenes_ignoradas:
+        lotes_ignorados = {}
+        for o in ordenes_ignoradas:
+            key = f"{o['establecimiento']}/{o['lote']}"
+            lotes_ignorados[key] = lotes_ignorados.get(key, 0) + 1
+        print(f"\n⚠ {len(ordenes_ignoradas)} tratamientos ignorados por no corresponder a lote agrícola:")
+        for lote_key, count in sorted(lotes_ignorados.items()):
+            print(f"    {lote_key}: {count} tratamiento(s)")
+    else:
+        print("\n✓ Todos los tratamientos corresponden a lotes agrícolas")
+
+    ordenes.sort(key=lambda x: x['fecha'] or '', reverse=True)
+
+    # === CONSTRUIR LISTA DE LOTES ===
+    # Universo = SOLO lotes de planilla Agricultura (no unión)
     lotes_lista = []
-    for (est, lote_code) in sorted(keys):
+    for (est, lote_code) in sorted(lotes_agricolas):
         ambientes = ambientes_por_lote.get((est, lote_code), [])
         ordenes_lote = [o for o in ordenes if o['establecimiento'] == est and o['lote'] == lote_code]
+
         principal = None
         sub_ambientes = []
         sin_ambiente = []
@@ -199,23 +226,23 @@ def procesar_planillas(buf_cultivos, buf_agricultura):
                 sin_ambiente.append(amb)
             else:
                 sub_ambientes.append(amb)
+
         if sub_ambientes:
             principal = max(sub_ambientes, key=lambda a: a['superficie'] or 0)
         elif sin_ambiente:
             principal = sin_ambiente[0]
-        elif ordenes_lote:
-            o = ordenes_lote[0]
+        else:
+            # Lote está en Agricultura pero sin datos de planificación cargados
             principal = {
-                "ambiente": None, "campaña": o['campaña'],
-                "superficie": o['superficie'], "cultivo": o['cultivo'],
-                "destino": "", "antecesor": o['antecesor'],
+                "ambiente": None, "campaña": "",
+                "superficie": 0, "cultivo": "—",
+                "destino": "", "antecesor": "",
                 "fecha_siembra": None, "semillero": "", "genetica": "",
                 "densidad_recomendada": None, "rinde_esperado": None,
                 "fertilizante_p": "", "dosis_fert_p": None,
                 "fertilizante_n": "", "dosis_fert_n": None,
             }
-        if principal is None:
-            continue
+
         if sub_ambientes:
             sup_total = sum(a['superficie'] or 0 for a in sub_ambientes)
         else:
@@ -259,7 +286,7 @@ def procesar_planillas(buf_cultivos, buf_agricultura):
 
 
 # =========================================================================
-# 3. Template HTML (mismo que build_webapp_v7.py)
+# 3. Generar HTML desde template
 # =========================================================================
 def generar_html(data):
     from pathlib import Path
@@ -273,7 +300,7 @@ def generar_html(data):
 # 4. Main
 # =========================================================================
 def main():
-    print(f"=== Actualización La Madrugada · {ahora_argentina().strftime('%Y-%m-%d %H:%M:%S')} ===\n")
+    print(f"=== Actualización La Madrugada · {ahora_argentina().strftime('%Y-%m-%d %H:%M:%S')} (ART) ===\n")
 
     access_token = get_access_token()
 
@@ -285,8 +312,8 @@ def main():
 
     print("\n→ Procesando datos...")
     data = procesar_planillas(buf_cultivos, buf_agricultura)
-    print(f"  ✓ {data['totales']['n_lotes']} lotes")
-    print(f"  ✓ {data['totales']['n_ordenes']} órdenes de trabajo")
+    print(f"\n  ✓ {data['totales']['n_lotes']} lotes agrícolas")
+    print(f"  ✓ {data['totales']['n_ordenes']} órdenes de trabajo (solo en lotes agrícolas)")
     print(f"  ✓ {data['totales']['superficie_total']} hectáreas")
 
     print("\n→ Generando HTML...")
