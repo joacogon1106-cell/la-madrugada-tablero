@@ -101,11 +101,15 @@ def procesar_planillas(buf_cultivos, buf_agricultura):
     df = df.dropna(how='all')
     df = df[df['Establecimiento'].notna() & (df['Establecimiento'] != 'TOTALES')]
     df = df[df['Lote'] != '.']
+
+    # === CAMBIO: usar "Fecha real" (columna F) como fecha efectiva de la aplicación ===
+    # Si "Fecha real" está vacía, hacer fallback a "Fecha" (planificada) para no romper nada.
     df['Fecha'] = pd.to_datetime(df['Fecha'], errors='coerce')
-    df['Fecha realizado'] = pd.to_datetime(df['Fecha realizado'], errors='coerce')
+    df['Fecha real'] = pd.to_datetime(df['Fecha real'], errors='coerce')
+    df['Fecha efectiva'] = df['Fecha real'].fillna(df['Fecha'])
 
     ordenes_todas = []
-    for (fecha, est, lote), grupo in df.groupby(['Fecha', 'Establecimiento', 'Lote'], dropna=False):
+    for (fecha, est, lote), grupo in df.groupby(['Fecha efectiva', 'Establecimiento', 'Lote'], dropna=False):
         primera = grupo.iloc[0]
         cultivo_abrev = str(primera['Actividad']).strip() if pd.notna(primera['Actividad']) else "."
         antecesor_abrev = str(primera['Antecesor']).strip() if pd.notna(primera['Antecesor']) else "."
@@ -134,7 +138,8 @@ def procesar_planillas(buf_cultivos, buf_agricultura):
 
         ordenes_todas.append({
             "fecha": fecha.strftime("%Y-%m-%d") if pd.notna(fecha) else None,
-            "fecha_realizado": primera['Fecha realizado'].strftime("%Y-%m-%d") if pd.notna(primera['Fecha realizado']) else None,
+            "fecha_planificada": primera['Fecha'].strftime("%Y-%m-%d") if pd.notna(primera['Fecha']) else None,
+            "fecha_real": primera['Fecha real'].strftime("%Y-%m-%d") if pd.notna(primera['Fecha real']) else None,
             "establecimiento": est,
             "lote": lote,
             "superficie": float(primera['Sup']) if pd.notna(primera['Sup']) else None,
