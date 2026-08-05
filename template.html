@@ -2246,17 +2246,8 @@ function openInformeConfig() {
       </div>
     </div>
 
-    <div class="inf-group">
-      <span class="inf-group-label">Estilo del encabezado</span>
-      <div class="inf-opts" id="inf-estilo">
-        <button class="inf-opt active" data-estilo="estilo1">Con estilo</button>
-        <button class="inf-opt" data-estilo="estilo2">Simple</button>
-        <button class="inf-opt" data-estilo="estilo3">Minimalista</button>
-      </div>
-    </div>
-
     <button class="inf-generar" id="inf-generar">Generar y previsualizar</button>
-    <div class="inf-hint">Se abre una vista lista para imprimir. En el celular: tocá compartir/imprimir → "Guardar como PDF". Probá los 3 estilos para elegir tu favorito.</div>
+    <div class="inf-hint">Se abre una vista lista para imprimir. En el celular: tocá compartir/imprimir → "Guardar como PDF".</div>
   `;
 
   // Listeners de las opciones
@@ -2271,11 +2262,6 @@ function openInformeConfig() {
     inner.querySelectorAll('#inf-lotes .inf-opt').forEach(x => x.classList.remove('active'));
     b.classList.add('active');
     infCfg.lotes = b.dataset.lotes;
-  }));
-  inner.querySelectorAll('#inf-estilo .inf-opt').forEach(b => b.addEventListener('click', () => {
-    inner.querySelectorAll('#inf-estilo .inf-opt').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    infCfg.estilo = b.dataset.estilo;
   }));
   document.getElementById('inf-generar').addEventListener('click', generarInforme);
 
@@ -2331,10 +2317,8 @@ function construirInformeHTML(regs, d1, d2) {
   const periodoTxt = (d1 === d2) ? labelDesde : `${labelDesde} — ${labelHasta}`;
   const totalLotes = new Set(regs.map(r => r.lote)).size;
 
-  // Encabezado según estilo
-  let headerHTML = '';
-  if (infCfg.estilo === 'estilo1') {
-    headerHTML = `
+  // Encabezado (estilo "Con estilo")
+  const headerHTML = `
       <div class="inf-header inf-header-1">
         <div class="inf-h1-bar"></div>
         <div class="inf-h1-main">
@@ -2346,19 +2330,6 @@ function construirInformeHTML(regs, d1, d2) {
           <div class="inf-h1-stats">${regs.length} registro${regs.length===1?'':'s'} · ${totalLotes} lote${totalLotes===1?'':'s'}</div>
         </div>
       </div>`;
-  } else if (infCfg.estilo === 'estilo2') {
-    headerHTML = `
-      <div class="inf-header inf-header-2">
-        <div class="inf-h2-title">La Madrugada — Informe de monitoreo</div>
-        <div class="inf-h2-meta">${periodoTxt} · ${regs.length} registro${regs.length===1?'':'s'} · ${totalLotes} lote${totalLotes===1?'':'s'}</div>
-      </div>`;
-  } else {
-    headerHTML = `
-      <div class="inf-header inf-header-3">
-        <div class="inf-h3-periodo">${periodoTxt}</div>
-        <div class="inf-h3-stats">${regs.length} registro${regs.length===1?'':'s'} · ${totalLotes} lote${totalLotes===1?'':'s'}</div>
-      </div>`;
-  }
 
   // Cuerpo: secciones por cultivo
   const cultivosOrden = Object.keys(porCultivo).sort();
@@ -2431,16 +2402,6 @@ function construirInformeHTML(regs, d1, d2) {
   .inf-h1-periodo { font-family:'Fraunces',serif; font-size:18px; font-weight:600; color:var(--olive-2); }
   .inf-h1-stats { font-size:12px; color:var(--ink-mute); margin-top:2px; }
 
-  /* Encabezado estilo 2 - Simple */
-  .inf-header-2 { border-bottom:2px solid var(--ink); padding-bottom:14px; margin-bottom:28px; }
-  .inf-h2-title { font-family:'Fraunces',serif; font-size:24px; font-weight:600; color:var(--ink); }
-  .inf-h2-meta { font-size:13px; color:var(--ink-3); margin-top:4px; }
-
-  /* Encabezado estilo 3 - Minimalista */
-  .inf-header-3 { display:flex; justify-content:space-between; align-items:baseline; padding-bottom:10px; margin-bottom:24px; border-bottom:1px solid var(--hairline); }
-  .inf-h3-periodo { font-size:16px; font-weight:600; color:var(--ink); }
-  .inf-h3-stats { font-size:12px; color:var(--ink-mute); }
-
   /* Secciones por cultivo */
   .inf-cultivo-sec { margin-bottom:28px; page-break-inside:auto; }
   .inf-cultivo-title { font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--olive); padding:6px 0 10px; border-bottom:1px solid var(--hairline-2); margin-bottom:14px; }
@@ -2473,7 +2434,7 @@ function construirInformeHTML(regs, d1, d2) {
   </div>
   ${headerHTML}
   ${bodyHTML}
-  <div class="inf-footer">Generado el ${fechaGen} · Tablero La Madrugada</div>
+  <div class="inf-footer">Generado el ${fechaGen} · Joaquín González</div>
 </body></html>`;
 }
 
