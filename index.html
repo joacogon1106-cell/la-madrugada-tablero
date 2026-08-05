@@ -1212,6 +1212,95 @@ body {
 .empty-sub { font-size: 13px; }
 
 .view { display: none; }
+
+/* ============ Monitoreo ============ */
+.mon-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 20px 0 8px;
+}
+.mon-filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.mon-actions { display: flex; gap: 10px; align-items: center; }
+.mon-refresh {
+  font-family: inherit; font-size: 13px; font-weight: 500;
+  color: var(--ink-2); background: var(--paper-2);
+  border: 1px solid var(--hairline-2); border-radius: var(--radius-sm);
+  padding: 8px 14px; cursor: pointer; transition: all .15s;
+}
+.mon-refresh:hover { background: var(--paper-3); border-color: var(--olive); }
+.mon-refresh.loading { opacity: .5; pointer-events: none; }
+.mon-add {
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  color: #fff; background: var(--olive); text-decoration: none;
+  border-radius: var(--radius-sm); padding: 8px 16px;
+  transition: background .15s; white-space: nowrap;
+}
+.mon-add:hover { background: var(--olive-2); }
+.mon-status { font-size: 13px; color: var(--ink-3); padding: 8px 0; min-height: 20px; }
+.mon-status.error { color: var(--rust); }
+
+.mon-list { display: flex; flex-direction: column; gap: 20px; padding-top: 8px; }
+.mon-fecha-group { border: 1px solid var(--hairline); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+.mon-fecha-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 18px; background: var(--paper-2);
+  border-bottom: 1px solid var(--hairline); cursor: pointer; user-select: none;
+}
+.mon-fecha-header:hover { background: var(--paper-3); }
+.mon-fecha-titulo { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; color: var(--ink); }
+.mon-fecha-count { font-size: 12px; color: var(--ink-3); font-weight: 500; }
+.mon-fecha-toggle { font-size: 13px; color: var(--ink-mute); transition: transform .2s; }
+.mon-fecha-group.collapsed .mon-fecha-toggle { transform: rotate(-90deg); }
+.mon-fecha-group.collapsed .mon-lote-group { display: none; }
+
+.mon-lote-group { border-bottom: 1px solid var(--hairline); }
+.mon-lote-group:last-child { border-bottom: none; }
+.mon-lote-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 18px; background: var(--paper);
+}
+.mon-lote-nombre { font-weight: 600; font-size: 14px; color: var(--ink-2); }
+.mon-lote-est { font-size: 11px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: .04em; }
+
+.mon-registro {
+  padding: 12px 18px 14px 18px; border-top: 1px dashed var(--hairline);
+  display: grid; grid-template-columns: 1fr auto; gap: 6px 12px;
+}
+.mon-reg-main { display: flex; flex-direction: column; gap: 4px; }
+.mon-reg-linea { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.mon-reg-cultivo { font-weight: 600; font-size: 14px; color: var(--ink); }
+.mon-reg-ef { font-size: 13px; color: var(--ink-2); }
+.mon-reg-coment { font-size: 13px; color: var(--ink-3); line-height: 1.45; margin-top: 2px; }
+.mon-reg-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+
+.mon-estado {
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 20px; white-space: nowrap;
+}
+.mon-estado.malo       { background: #F4D8C0; color: #8B3A20; }
+.mon-estado.regular    { background: #F8E8C5; color: #7A5410; }
+.mon-estado.bueno      { background: #E8F0D9; color: #3A5028; }
+.mon-estado.muy-bueno  { background: #DCEEDC; color: #2C5A2C; }
+.mon-estado.excelente  { background: #C7E5C7; color: #1E4A1E; }
+
+.mon-aplica {
+  font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+  white-space: nowrap;
+}
+.mon-aplica.si { background: #F4D8C0; color: #8B3A20; }
+.mon-aplica.no { background: var(--paper-2); color: var(--ink-mute); }
+
+.mon-fotos { display: flex; gap: 6px; margin-top: 6px; }
+.mon-foto {
+  width: 54px; height: 54px; border-radius: var(--radius-sm);
+  object-fit: cover; border: 1px solid var(--hairline-2); cursor: pointer;
+  background: var(--paper-2);
+}
+.mon-empty { text-align: center; padding: 48px 20px; color: var(--ink-3); font-size: 14px; }
+.mon-empty-title { font-family: 'Fraunces', serif; font-size: 18px; color: var(--ink-2); margin-bottom: 6px; }
 .view.active { display: block; }
 
 .section-label {
@@ -1342,6 +1431,9 @@ body {
     <button class="tab" data-view="tratamientos">
       Tratamientos <span class="tab-count" id="count-trat">0</span>
     </button>
+    <button class="tab" data-view="monitoreo">
+      Monitoreo <span class="tab-count" id="count-monitoreo">0</span>
+    </button>
   </nav>
 
   <section class="filters" id="filters">
@@ -1368,6 +1460,34 @@ body {
 
     <div class="view" id="view-tratamientos">
       <div class="tratamientos-list" id="tratamientos-list"></div>
+    </div>
+
+    <div class="view" id="view-monitoreo">
+      <div class="mon-toolbar">
+        <div class="mon-filters">
+          <select class="filter-select" id="mon-filter-est">
+            <option value="">Todos los establecimientos</option>
+          </select>
+          <select class="filter-select" id="mon-filter-lote">
+            <option value="">Todos los lotes</option>
+          </select>
+          <select class="filter-select" id="mon-filter-fecha">
+            <option value="">Todas las fechas</option>
+          </select>
+          <select class="filter-select" id="mon-filter-aplica">
+            <option value="">Aplica: todos</option>
+            <option value="Se Aplica">Se Aplica</option>
+            <option value="No Se Aplica">No Se Aplica</option>
+          </select>
+          <button class="filter-clear" id="mon-filter-clear" style="display:none">Limpiar</button>
+        </div>
+        <div class="mon-actions">
+          <button class="mon-refresh" id="mon-refresh" title="Actualizar datos">↻ Actualizar</button>
+          <a class="mon-add" id="mon-add-link" href="#" target="_blank" rel="noopener">+ Cargar monitoreo</a>
+        </div>
+      </div>
+      <div class="mon-status" id="mon-status"></div>
+      <div class="mon-list" id="mon-list"></div>
     </div>
 
   </main>
@@ -1649,8 +1769,259 @@ function formatFertResumen(info) {
 // =============== Estado de filtros ===============
 const state = {
   view: 'lotes',
-  filter: { campana: '', est: '', cultivo: '', tipo: '' }
+  filter: { campana: '', est: '', cultivo: '', tipo: '' },
+  monFilter: { est: '', lote: '', fecha: '', aplica: '' }
 };
+
+// URL del CSV publicado de la hoja Monitoreo (Archivo → Compartir → Publicar en la web → hoja Monitoreo → CSV)
+const MONITOREO_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7AJWdJD3ZRZfjb8DU2-mJK_mkitU5cajFDpSzeLXrtfdxNKWSTyFYvUmEL13ttg/pub?gid=375148785&single=true&output=csv";
+// URL de la app de AppSheet para el botón "Cargar monitoreo" (reemplazar por la URL real de la app)
+const APPSHEET_URL = "";
+
+let monitoreoData = null;   // array de registros parseados
+let monitoreoLoaded = false;
+
+// =============== Monitoreo ===============
+
+// Parser CSV robusto (maneja comillas, comas internas y saltos de línea dentro de celdas)
+function parseCSV(text) {
+  const rows = [];
+  let row = [], cur = '', inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i], next = text[i + 1];
+    if (inQuotes) {
+      if (c === '"' && next === '"') { cur += '"'; i++; }
+      else if (c === '"') { inQuotes = false; }
+      else { cur += c; }
+    } else {
+      if (c === '"') { inQuotes = true; }
+      else if (c === ',') { row.push(cur); cur = ''; }
+      else if (c === '\r') { /* ignorar */ }
+      else if (c === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+      else { cur += c; }
+    }
+  }
+  if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+
+// Convierte URLs de Google Drive a formato visible en <img>
+function driveImgUrl(raw) {
+  if (!raw) return '';
+  raw = raw.trim();
+  if (!raw) return '';
+  if (/^https?:\/\//i.test(raw)) {
+    const m = raw.match(/[-\w]{25,}/);
+    if (m) return `https://drive.google.com/thumbnail?id=${m[0]}&sz=w300`;
+    return raw;
+  }
+  return ''; // ruta interna de AppSheet: no accesible como imagen pública (por ahora)
+}
+
+function normalizeEstado(e) {
+  return (e || '').toLowerCase().replace(/\s+/g, '-').trim();
+}
+
+// Convierte fecha a objeto ordenable + texto legible
+function parseFecha(raw) {
+  if (!raw) return { key: '0000-00-00', label: 'Sin fecha' };
+  raw = raw.trim();
+  let d = null;
+  // formatos: DD/MM/YYYY o YYYY-MM-DD o MM/DD/YYYY (Google suele exportar M/D/YYYY)
+  let m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) { d = new Date(+m[1], +m[2] - 1, +m[3]); }
+  else {
+    m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m) {
+      let a = +m[1], b = +m[2];
+      // Si el primer número es >12, es día (DD/MM). Si el segundo es >12, es MM/DD.
+      // Por defecto, para el ambiente argentino, asumimos DD/MM/YYYY.
+      let dia, mes;
+      if (a > 12) { dia = a; mes = b; }
+      else if (b > 12) { mes = a; dia = b; }
+      else { dia = a; mes = b; } // ambiguo: preferimos DD/MM (config regional AR)
+      d = new Date(+m[3], mes - 1, dia);
+    }
+  }
+  if (!d || isNaN(d)) return { key: raw, label: raw };
+  const key = d.toISOString().slice(0, 10);
+  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const label = `${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`;
+  return { key, label };
+}
+
+async function loadMonitoreo(force) {
+  if (monitoreoLoaded && !force) { renderMonitoreo(); return; }
+  const statusEl = document.getElementById('mon-status');
+  const refreshBtn = document.getElementById('mon-refresh');
+  statusEl.className = 'mon-status';
+  statusEl.textContent = 'Cargando monitoreos…';
+  if (refreshBtn) refreshBtn.classList.add('loading');
+  try {
+    // cache-buster para traer lo más reciente
+    const url = MONITOREO_CSV_URL + (MONITOREO_CSV_URL.includes('?') ? '&' : '?') + '_t=' + Date.now();
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const text = await resp.text();
+    const rows = parseCSV(text).filter(r => r.some(c => c && c.trim() !== ''));
+    if (rows.length < 1) { monitoreoData = []; }
+    else {
+      const headers = rows[0].map(h => h.trim());
+      const idx = name => headers.findIndex(h => h.toLowerCase() === name.toLowerCase());
+      const iFecha = idx('Fecha'), iCampo = idx('Campo'), iLote = idx('Lote'),
+            iCultivo = idx('Cultivo'), iEF = idx('EF'), iEstado = idx('Estado'),
+            iCom = idx('Comentarios'), iF1 = idx('Foto1'), iF2 = idx('Foto2'),
+            iF3 = idx('Foto3'), iAplica = idx('Aplica');
+      monitoreoData = rows.slice(1).map(r => ({
+        fecha: iFecha >= 0 ? r[iFecha] : '',
+        campo: iCampo >= 0 ? r[iCampo] : '',
+        lote: iLote >= 0 ? r[iLote] : '',
+        cultivo: iCultivo >= 0 ? r[iCultivo] : '',
+        ef: iEF >= 0 ? r[iEF] : '',
+        estado: iEstado >= 0 ? r[iEstado] : '',
+        comentarios: iCom >= 0 ? r[iCom] : '',
+        fotos: [iF1, iF2, iF3].filter(i => i >= 0).map(i => r[i]).filter(Boolean),
+        aplica: iAplica >= 0 ? r[iAplica] : ''
+      })).filter(reg => reg.lote || reg.cultivo || reg.ef); // descartar filas vacías
+    }
+    monitoreoLoaded = true;
+    populateMonFilters();
+    renderMonitoreo();
+    statusEl.textContent = monitoreoData.length
+      ? `${monitoreoData.length} monitoreo${monitoreoData.length === 1 ? '' : 's'} · actualizado ${new Date().toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'})}`
+      : '';
+  } catch (err) {
+    statusEl.className = 'mon-status error';
+    statusEl.textContent = 'No se pudieron cargar los monitoreos. Verificá que la hoja esté publicada como CSV. (' + err.message + ')';
+    document.getElementById('mon-list').innerHTML = '';
+  } finally {
+    if (refreshBtn) refreshBtn.classList.remove('loading');
+  }
+}
+
+function populateMonFilters() {
+  if (!monitoreoData) return;
+  const estSel = document.getElementById('mon-filter-est');
+  const loteSel = document.getElementById('mon-filter-lote');
+  const fechaSel = document.getElementById('mon-filter-fecha');
+  const ests = [...new Set(monitoreoData.map(r => r.campo).filter(Boolean))].sort();
+  const lotes = [...new Set(monitoreoData.map(r => r.lote).filter(Boolean))].sort();
+  const fechas = [...new Set(monitoreoData.map(r => parseFecha(r.fecha).key))]
+    .sort().reverse();
+  const fechaLabels = {};
+  monitoreoData.forEach(r => { const f = parseFecha(r.fecha); fechaLabels[f.key] = f.label; });
+
+  estSel.innerHTML = '<option value="">Todos los establecimientos</option>' +
+    ests.map(e => `<option value="${e}">${e.replace(/_/g, ' ')}</option>`).join('');
+  loteSel.innerHTML = '<option value="">Todos los lotes</option>' +
+    lotes.map(l => `<option value="${l}">${l}</option>`).join('');
+  fechaSel.innerHTML = '<option value="">Todas las fechas</option>' +
+    fechas.map(f => `<option value="${f}">${fechaLabels[f] || f}</option>`).join('');
+}
+
+function renderMonitoreo() {
+  const listEl = document.getElementById('mon-list');
+  const countEl = document.getElementById('count-monitoreo');
+  if (!monitoreoData) { listEl.innerHTML = ''; return; }
+
+  const f = state.monFilter;
+  let data = monitoreoData.filter(r =>
+    (!f.est || r.campo === f.est) &&
+    (!f.lote || r.lote === f.lote) &&
+    (!f.fecha || parseFecha(r.fecha).key === f.fecha) &&
+    (!f.aplica || r.aplica === f.aplica)
+  );
+
+  if (countEl) countEl.textContent = monitoreoData.length;
+
+  const anyFilter = f.est || f.lote || f.fecha || f.aplica;
+  document.getElementById('mon-filter-clear').style.display = anyFilter ? '' : 'none';
+
+  if (!data.length) {
+    listEl.innerHTML = `<div class="mon-empty">
+      <div class="mon-empty-title">${monitoreoData.length ? 'Sin resultados' : 'Todavía no hay monitoreos'}</div>
+      <div>${monitoreoData.length ? 'Probá cambiar los filtros.' : 'Cargá el primero desde la app de monitoreo.'}</div>
+    </div>`;
+    return;
+  }
+
+  // Agrupar por Fecha, luego por Lote
+  const porFecha = {};
+  data.forEach(r => {
+    const fk = parseFecha(r.fecha);
+    if (!porFecha[fk.key]) porFecha[fk.key] = { label: fk.label, lotes: {}, count: 0 };
+    if (!porFecha[fk.key].lotes[r.lote]) porFecha[fk.key].lotes[r.lote] = { campo: r.campo, regs: [] };
+    porFecha[fk.key].lotes[r.lote].regs.push(r);
+    porFecha[fk.key].count++;
+  });
+
+  const fechasOrden = Object.keys(porFecha).sort().reverse();
+  listEl.innerHTML = fechasOrden.map(fk => {
+    const g = porFecha[fk];
+    const lotesHtml = Object.keys(g.lotes).sort().map(lote => {
+      const lg = g.lotes[lote];
+      const regsHtml = lg.regs.map(r => {
+        const estadoClass = normalizeEstado(r.estado);
+        const aplicaSi = /se aplica/i.test(r.aplica) && !/no se aplica/i.test(r.aplica);
+        const aplicaHtml = r.aplica
+          ? `<span class="mon-aplica ${aplicaSi ? 'si' : 'no'}">${r.aplica}</span>` : '';
+        const estadoHtml = r.estado
+          ? `<span class="mon-estado ${estadoClass}">${r.estado}</span>` : '';
+        const fotosHtml = r.fotos.map(driveImgUrl).filter(Boolean).map(u =>
+          `<img class="mon-foto" src="${u}" loading="lazy" onclick="window.open('${u}','_blank')" alt="foto monitoreo">`
+        ).join('');
+        return `<div class="mon-registro">
+          <div class="mon-reg-main">
+            <div class="mon-reg-linea">
+              ${r.cultivo ? `<span class="mon-reg-cultivo">${r.cultivo}</span>` : ''}
+              ${r.ef ? `<span class="mon-reg-ef">${r.ef}</span>` : ''}
+            </div>
+            ${r.comentarios ? `<div class="mon-reg-coment">${r.comentarios}</div>` : ''}
+            ${fotosHtml ? `<div class="mon-fotos">${fotosHtml}</div>` : ''}
+          </div>
+          <div class="mon-reg-right">
+            ${estadoHtml}
+            ${aplicaHtml}
+          </div>
+        </div>`;
+      }).join('');
+      return `<div class="mon-lote-group">
+        <div class="mon-lote-header">
+          <span class="mon-lote-nombre">${lote}</span>
+          <span class="mon-lote-est">${(lg.campo || '').replace(/_/g,' ')}</span>
+        </div>
+        ${regsHtml}
+      </div>`;
+    }).join('');
+    return `<div class="mon-fecha-group">
+      <div class="mon-fecha-header" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span class="mon-fecha-titulo">${g.label}</span>
+        <span style="display:flex;align-items:center;gap:12px;">
+          <span class="mon-fecha-count">${g.count} registro${g.count===1?'':'s'}</span>
+          <span class="mon-fecha-toggle">▾</span>
+        </span>
+      </div>
+      ${lotesHtml}
+    </div>`;
+  }).join('');
+}
+
+function setupMonitoreo() {
+  const link = document.getElementById('mon-add-link');
+  if (APPSHEET_URL) { link.href = APPSHEET_URL; }
+  else { link.style.display = 'none'; }
+
+  document.getElementById('mon-refresh').addEventListener('click', () => loadMonitoreo(true));
+  document.getElementById('mon-filter-est').addEventListener('change', e => { state.monFilter.est = e.target.value; renderMonitoreo(); });
+  document.getElementById('mon-filter-lote').addEventListener('change', e => { state.monFilter.lote = e.target.value; renderMonitoreo(); });
+  document.getElementById('mon-filter-fecha').addEventListener('change', e => { state.monFilter.fecha = e.target.value; renderMonitoreo(); });
+  document.getElementById('mon-filter-aplica').addEventListener('change', e => { state.monFilter.aplica = e.target.value; renderMonitoreo(); });
+  document.getElementById('mon-filter-clear').addEventListener('click', () => {
+    state.monFilter = { est: '', lote: '', fecha: '', aplica: '' };
+    ['mon-filter-est','mon-filter-lote','mon-filter-fecha','mon-filter-aplica'].forEach(id => document.getElementById(id).value = '');
+    renderMonitoreo();
+  });
+}
 
 // =============== Init ===============
 function init() {
@@ -1658,6 +2029,7 @@ function init() {
   populateFilters();
   renderAll();
   computeKPIs();
+  setupMonitoreo();
 
   // Tabs
   document.querySelectorAll('.tab').forEach(btn => {
@@ -1667,6 +2039,11 @@ function init() {
       document.querySelectorAll('.view').forEach(v => {
         v.classList.toggle('active', v.id === 'view-' + state.view);
       });
+      // Ocultar los filtros del tablero principal en la solapa Monitoreo (tiene los suyos)
+      const mainFilters = document.getElementById('filters');
+      if (mainFilters) mainFilters.style.display = (state.view === 'monitoreo') ? 'none' : '';
+      // Cargar monitoreos al entrar por primera vez
+      if (state.view === 'monitoreo') loadMonitoreo(false);
     });
   });
 
