@@ -1873,11 +1873,14 @@ const state = {
 const MONITOREO_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7AJWdJD3ZRZfjb8DU2-mJK_mkitU5cajFDpSzeLXrtfdxNKWSTyFYvUmEL13ttg/pub?gid=375148785&single=true&output=csv";
 // URL de la app de AppSheet para el botón "Cargar monitoreo" (reemplazar por la URL real de la app)
 const APPSHEET_URL = "https://www.appsheet.com/start/bdb78dc3-5ba3-4abb-8e38-62bb3114e626";
+// URL del CSV de FotosID (puente ruta interna -> ID de Drive, generado por Apps Script)
+const FOTOS_ID_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTilh9mG-7kp7ciFUeFi5u9GSY4GWeQLIZxLj64AMLggJmJpFylEPD-eoqKY1wSxdMmM6_aQYMKwgSf/pub?gid=0&single=true&output=csv";
 
 let monitoreoData = null;   // array de registros parseados
 let monitoreoLoaded = false;
 let monNavList = [];        // lista plana ordenada para navegar en el modal
 let monNavCurrent = 0;      // índice actual en el modal
+let fotosIdMap = {};        // { "Monitoreo_Images/xxx.jpg": "driveID" }
 
 // =============== Monitoreo ===============
 
@@ -1903,17 +1906,21 @@ function parseCSV(text) {
   return rows;
 }
 
-// Convierte URLs de Google Drive a formato visible en <img>
+// Convierte una referencia de foto (URL de Drive o ruta interna de AppSheet) en URL visible
 function driveImgUrl(raw) {
   if (!raw) return '';
   raw = raw.trim();
   if (!raw) return '';
+  // Caso 1: ya es una URL completa (http/https) -> extraer ID de Drive si lo tiene
   if (/^https?:\/\//i.test(raw)) {
     const m = raw.match(/[-\w]{25,}/);
-    if (m) return `https://drive.google.com/thumbnail?id=${m[0]}&sz=w300`;
+    if (m) return `https://drive.google.com/thumbnail?id=${m[0]}&sz=w800`;
     return raw;
   }
-  return ''; // ruta interna de AppSheet: no accesible como imagen pública (por ahora)
+  // Caso 2: ruta interna de AppSheet (Monitoreo_Images/xxx.jpg) -> buscar ID en el mapa
+  const id = fotosIdMap[raw];
+  if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w800`;
+  return ''; // sin mapeo disponible todavía
 }
 
 function normalizeEstado(e) {
@@ -1948,6 +1955,31 @@ function parseFecha(raw) {
   return { key, label };
 }
 
+// Carga el puente FotosID (ruta interna -> ID de Drive) desde su CSV publicado
+async function loadFotosId() {
+  try {
+    const url = FOTOS_ID_CSV_URL + (FOTOS_ID_CSV_URL.includes('?') ? '&' : '?') + '_t=' + Date.now();
+    const resp = await fetch(url);
+    if (!resp.ok) return; // si falla, seguimos sin fotos (no rompe el resto)
+    const text = await resp.text();
+    const rows = parseCSV(text).filter(r => r.some(c => c && c.trim() !== ''));
+    if (rows.length < 2) return;
+    const headers = rows[0].map(h => h.trim().toLowerCase());
+    const iNombre = headers.indexOf('nombre');
+    const iId = headers.indexOf('id');
+    if (iNombre < 0 || iId < 0) return;
+    const mapa = {};
+    rows.slice(1).forEach(r => {
+      const nombre = (r[iNombre] || '').trim();
+      const id = (r[iId] || '').trim();
+      if (nombre && id) mapa[nombre] = id;
+    });
+    fotosIdMap = mapa;
+  } catch (e) {
+    // silencioso: si el puente no carga, las fotos simplemente no aparecen
+  }
+}
+
 async function loadMonitoreo(force) {
   if (monitoreoLoaded && !force) { renderMonitoreo(); return; }
   const statusEl = document.getElementById('mon-status');
@@ -1956,6 +1988,8 @@ async function loadMonitoreo(force) {
   statusEl.textContent = 'Cargando monitoreos…';
   if (refreshBtn) refreshBtn.classList.add('loading');
   try {
+    // Cargar primero el puente de fotos (nombre interno -> ID de Drive)
+    await loadFotosId();
     // cache-buster para traer lo más reciente
     const url = MONITOREO_CSV_URL + (MONITOREO_CSV_URL.includes('?') ? '&' : '?') + '_t=' + Date.now();
     const resp = await fetch(url);
