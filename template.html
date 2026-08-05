@@ -1348,6 +1348,47 @@ body {
 }
 .mon-modal-fotos img:hover { transform: scale(1.02); }
 .mon-modal-nofotos { font-size: 14px; color: var(--ink-mute); text-align: center; padding: 24px; background: var(--paper-2); border-radius: var(--radius-sm); }
+
+/* Botón Generar informe */
+.mon-informe {
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  color: var(--ink-2); background: var(--paper-2);
+  border: 1px solid var(--hairline-2); border-radius: var(--radius-sm);
+  padding: 8px 16px; cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.mon-informe:hover { background: var(--paper-3); border-color: var(--olive); }
+
+/* Modal de configuración del informe */
+.inf-config-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.inf-config-sub { font-size: 14px; color: var(--ink-3); margin-bottom: 24px; }
+.inf-group { margin-bottom: 22px; }
+.inf-group-label { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-mute); font-weight: 700; margin-bottom: 10px; display: block; }
+.inf-opts { display: flex; gap: 8px; flex-wrap: wrap; }
+.inf-opt {
+  font-family: inherit; font-size: 13px; font-weight: 500;
+  padding: 8px 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--hairline-2); background: var(--paper);
+  color: var(--ink-2); cursor: pointer; transition: all .12s;
+}
+.inf-opt:hover { border-color: var(--olive); }
+.inf-opt.active { background: var(--olive); color: #fff; border-color: var(--olive); }
+.inf-fechas { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.inf-fecha-field { display: flex; flex-direction: column; gap: 4px; }
+.inf-fecha-field label { font-size: 11px; color: var(--ink-mute); font-weight: 600; }
+.inf-fecha-field select {
+  font-family: inherit; font-size: 14px; padding: 8px 12px;
+  border: 1px solid var(--hairline-2); border-radius: var(--radius-sm);
+  background: var(--paper); color: var(--ink); cursor: pointer; min-width: 150px;
+}
+.inf-generar {
+  width: 100%; margin-top: 8px;
+  font-family: inherit; font-size: 15px; font-weight: 600;
+  color: #fff; background: var(--olive); border: none;
+  border-radius: var(--radius-sm); padding: 14px; cursor: pointer; transition: background .15s;
+}
+.inf-generar:hover { background: var(--olive-2); }
+.inf-generar:disabled { background: var(--ink-mute); cursor: default; }
+.inf-hint { font-size: 12px; color: var(--ink-mute); margin-top: 10px; text-align: center; line-height: 1.5; }
 .view.active { display: block; }
 
 .section-label {
@@ -1530,6 +1571,7 @@ body {
         </div>
         <div class="mon-actions">
           <button class="mon-refresh" id="mon-refresh" title="Actualizar datos">↻ Actualizar</button>
+          <button class="mon-informe" id="mon-informe-btn">📄 Generar informe</button>
           <a class="mon-add" id="mon-add-link" href="#" target="_blank" rel="noopener">+ Cargar monitoreo</a>
         </div>
       </div>
@@ -1545,6 +1587,13 @@ body {
   <div class="modal" id="modal-content">
     <button class="modal-close" id="modal-close" aria-label="Cerrar">×</button>
     <div id="modal-inner"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="informe-backdrop">
+  <div class="modal" id="informe-config">
+    <button class="modal-close" id="informe-close" aria-label="Cerrar">×</button>
+    <div id="informe-config-inner"></div>
   </div>
 </div>
 
@@ -2136,7 +2185,298 @@ function setupMonitoreo() {
     ['mon-filter-est','mon-filter-lote','mon-filter-fecha','mon-filter-aplica'].forEach(id => document.getElementById(id).value = '');
     renderMonitoreo();
   });
+
+  // Botón Generar informe
+  document.getElementById('mon-informe-btn').addEventListener('click', openInformeConfig);
+  document.getElementById('informe-close').addEventListener('click', closeInformeConfig);
+  document.getElementById('informe-backdrop').addEventListener('click', e => {
+    if (e.target.id === 'informe-backdrop') closeInformeConfig();
+  });
 }
+
+// =============== INFORME PDF ===============
+// Configuración temporal del informe mientras el usuario lo arma en el modal
+let infCfg = { modo: 'una', desde: '', hasta: '', lotes: 'todos', estilo: 'estilo1' };
+
+function closeInformeConfig() {
+  document.getElementById('informe-backdrop').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function openInformeConfig() {
+  if (!monitoreoData || !monitoreoData.length) {
+    alert('Todavía no hay monitoreos cargados para generar un informe.');
+    return;
+  }
+  // Fechas disponibles (key ISO + label)
+  const fechasMap = {};
+  monitoreoData.forEach(r => { const f = parseFecha(r.fecha); fechasMap[f.key] = f.label; });
+  const fechas = Object.keys(fechasMap).sort().reverse();
+  infCfg = { modo: 'una', desde: fechas[0] || '', hasta: fechas[0] || '', lotes: 'todos', estilo: 'estilo1' };
+
+  const optFecha = fechas.map(f => `<option value="${f}">${fechasMap[f]}</option>`).join('');
+  const inner = document.getElementById('informe-config-inner');
+  inner.innerHTML = `
+    <div class="inf-config-title">Generar informe</div>
+    <div class="inf-config-sub">Armá un informe listo para leer en el celular y compartir en PDF.</div>
+
+    <div class="inf-group">
+      <span class="inf-group-label">Período</span>
+      <div class="inf-opts" id="inf-modo">
+        <button class="inf-opt active" data-modo="una">Una fecha</button>
+        <button class="inf-opt" data-modo="rango">Rango de fechas</button>
+      </div>
+      <div class="inf-fechas" style="margin-top:12px;">
+        <div class="inf-fecha-field">
+          <label id="inf-desde-label">Fecha</label>
+          <select id="inf-desde">${optFecha}</select>
+        </div>
+        <div class="inf-fecha-field" id="inf-hasta-wrap" style="display:none;">
+          <label>Hasta</label>
+          <select id="inf-hasta">${optFecha}</select>
+        </div>
+      </div>
+    </div>
+
+    <div class="inf-group">
+      <span class="inf-group-label">Lotes a incluir</span>
+      <div class="inf-opts" id="inf-lotes">
+        <button class="inf-opt active" data-lotes="todos">Todos los lotes</button>
+        <button class="inf-opt" data-lotes="aplica">Solo "Se Aplica"</button>
+      </div>
+    </div>
+
+    <div class="inf-group">
+      <span class="inf-group-label">Estilo del encabezado</span>
+      <div class="inf-opts" id="inf-estilo">
+        <button class="inf-opt active" data-estilo="estilo1">Con estilo</button>
+        <button class="inf-opt" data-estilo="estilo2">Simple</button>
+        <button class="inf-opt" data-estilo="estilo3">Minimalista</button>
+      </div>
+    </div>
+
+    <button class="inf-generar" id="inf-generar">Generar y previsualizar</button>
+    <div class="inf-hint">Se abre una vista lista para imprimir. En el celular: tocá compartir/imprimir → "Guardar como PDF". Probá los 3 estilos para elegir tu favorito.</div>
+  `;
+
+  // Listeners de las opciones
+  inner.querySelectorAll('#inf-modo .inf-opt').forEach(b => b.addEventListener('click', () => {
+    inner.querySelectorAll('#inf-modo .inf-opt').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    infCfg.modo = b.dataset.modo;
+    document.getElementById('inf-hasta-wrap').style.display = infCfg.modo === 'rango' ? '' : 'none';
+    document.getElementById('inf-desde-label').textContent = infCfg.modo === 'rango' ? 'Desde' : 'Fecha';
+  }));
+  inner.querySelectorAll('#inf-lotes .inf-opt').forEach(b => b.addEventListener('click', () => {
+    inner.querySelectorAll('#inf-lotes .inf-opt').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    infCfg.lotes = b.dataset.lotes;
+  }));
+  inner.querySelectorAll('#inf-estilo .inf-opt').forEach(b => b.addEventListener('click', () => {
+    inner.querySelectorAll('#inf-estilo .inf-opt').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    infCfg.estilo = b.dataset.estilo;
+  }));
+  document.getElementById('inf-generar').addEventListener('click', generarInforme);
+
+  document.getElementById('informe-backdrop').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function generarInforme() {
+  infCfg.desde = document.getElementById('inf-desde').value;
+  infCfg.hasta = infCfg.modo === 'rango' ? document.getElementById('inf-hasta').value : infCfg.desde;
+  // normalizar rango (por si eligen al revés)
+  let d1 = infCfg.desde, d2 = infCfg.hasta;
+  if (d1 > d2) { const t = d1; d1 = d2; d2 = t; }
+
+  // Filtrar registros por fecha (y por aplica si corresponde)
+  let regs = monitoreoData.filter(r => {
+    const fk = parseFecha(r.fecha).key;
+    const enRango = infCfg.modo === 'rango' ? (fk >= d1 && fk <= d2) : (fk === d1);
+    if (!enRango) return false;
+    if (infCfg.lotes === 'aplica') {
+      return /se aplica/i.test(r.aplica) && !/no se aplica/i.test(r.aplica);
+    }
+    return true;
+  });
+
+  if (!regs.length) {
+    alert('No hay monitoreos que coincidan con esos filtros.');
+    return;
+  }
+
+  const html = construirInformeHTML(regs, d1, d2);
+  const win = window.open('', '_blank');
+  if (!win) { alert('El navegador bloqueó la ventana. Habilitá los pop-ups para este sitio.'); return; }
+  win.document.write(html);
+  win.document.close();
+  closeInformeConfig();
+}
+
+// Agrupa por Cultivo y arma el HTML imprimible según el estilo elegido
+function construirInformeHTML(regs, d1, d2) {
+  // Agrupar por cultivo
+  const porCultivo = {};
+  regs.forEach(r => {
+    const c = r.cultivo || 'Sin cultivo';
+    if (!porCultivo[c]) porCultivo[c] = [];
+    porCultivo[c].push(r);
+  });
+  // Dentro de cada cultivo, ordenar por lote
+  Object.keys(porCultivo).forEach(c => porCultivo[c].sort((a,b) => (a.lote||'').localeCompare(b.lote||'')));
+
+  const labelDesde = parseFecha(d1 + 'T00:00').label;
+  const labelHasta = parseFecha(d2 + 'T00:00').label;
+  const periodoTxt = (d1 === d2) ? labelDesde : `${labelDesde} — ${labelHasta}`;
+  const totalLotes = new Set(regs.map(r => r.lote)).size;
+
+  // Encabezado según estilo
+  let headerHTML = '';
+  if (infCfg.estilo === 'estilo1') {
+    headerHTML = `
+      <div class="inf-header inf-header-1">
+        <div class="inf-h1-bar"></div>
+        <div class="inf-h1-main">
+          <div class="inf-h1-title">La Madrugada</div>
+          <div class="inf-h1-sub">Informe de monitoreo</div>
+        </div>
+        <div class="inf-h1-meta">
+          <div class="inf-h1-periodo">${periodoTxt}</div>
+          <div class="inf-h1-stats">${regs.length} registro${regs.length===1?'':'s'} · ${totalLotes} lote${totalLotes===1?'':'s'}</div>
+        </div>
+      </div>`;
+  } else if (infCfg.estilo === 'estilo2') {
+    headerHTML = `
+      <div class="inf-header inf-header-2">
+        <div class="inf-h2-title">La Madrugada — Informe de monitoreo</div>
+        <div class="inf-h2-meta">${periodoTxt} · ${regs.length} registro${regs.length===1?'':'s'} · ${totalLotes} lote${totalLotes===1?'':'s'}</div>
+      </div>`;
+  } else {
+    headerHTML = `
+      <div class="inf-header inf-header-3">
+        <div class="inf-h3-periodo">${periodoTxt}</div>
+        <div class="inf-h3-stats">${regs.length} registro${regs.length===1?'':'s'} · ${totalLotes} lote${totalLotes===1?'':'s'}</div>
+      </div>`;
+  }
+
+  // Cuerpo: secciones por cultivo
+  const cultivosOrden = Object.keys(porCultivo).sort();
+  const bodyHTML = cultivosOrden.map(cultivo => {
+    const items = porCultivo[cultivo].map(r => {
+      const fk = parseFecha(r.fecha);
+      const estadoClass = normalizeEstado(r.estado);
+      const aplicaSi = /se aplica/i.test(r.aplica) && !/no se aplica/i.test(r.aplica);
+      const fotos = r.fotos.map(driveImgUrl).filter(Boolean);
+      const fotosHTML = fotos.length
+        ? `<div class="inf-fotos">${fotos.map(u => `<img src="${u}" alt="foto">`).join('')}</div>`
+        : '';
+      const badges = [
+        r.estado ? `<span class="inf-badge inf-estado-${estadoClass}">${r.estado}</span>` : '',
+        r.aplica ? `<span class="inf-badge inf-aplica-${aplicaSi?'si':'no'}">${r.aplica}</span>` : ''
+      ].join('');
+      return `
+        <div class="inf-lote">
+          <div class="inf-lote-top">
+            <div class="inf-lote-id">
+              <span class="inf-lote-nombre">${r.lote}</span>
+              <span class="inf-lote-campo">${(r.campo||'').replace(/_/g,' ')}</span>
+              ${r.ef ? `<span class="inf-lote-ef">${r.ef}</span>` : ''}
+            </div>
+            <div class="inf-lote-badges">${badges}</div>
+          </div>
+          ${r.comentarios ? `<div class="inf-lote-coment">${r.comentarios}</div>` : '<div class="inf-lote-coment inf-sincoment">Sin comentarios</div>'}
+          ${fotosHTML}
+        </div>`;
+    }).join('');
+    return `
+      <div class="inf-cultivo-sec">
+        <div class="inf-cultivo-title">${cultivo}</div>
+        ${items}
+      </div>`;
+  }).join('');
+
+  const fechaGen = new Date().toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric'});
+
+  return `<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe de monitoreo — La Madrugada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:#fff; --paper-2:#F4F7EF; --paper-3:#E8EEDC;
+    --ink:#1A2B12; --ink-2:#2D4520; --ink-3:#6B826B; --ink-mute:#95A695;
+    --hairline:#DDE4D2; --hairline-2:#C5D0B5; --olive:#3A5028; --olive-2:#4F6B36;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Inter',sans-serif; color:var(--ink); background:#fff; font-size:14px; line-height:1.5; padding:24px; max-width:820px; margin:0 auto; }
+
+  /* Barra de acción (no se imprime) */
+  .inf-actions { position:sticky; top:0; background:#fff; padding:12px 0 16px; border-bottom:1px solid var(--hairline); margin-bottom:24px; display:flex; gap:10px; justify-content:flex-end; z-index:10; }
+  .inf-btn { font-family:inherit; font-size:14px; font-weight:600; padding:10px 20px; border-radius:6px; cursor:pointer; border:1px solid var(--hairline-2); background:var(--paper-2); color:var(--ink-2); }
+  .inf-btn-primary { background:var(--olive); color:#fff; border-color:var(--olive); }
+  @media print { .inf-actions { display:none; } body { padding:0; } }
+
+  /* Encabezado estilo 1 - Con estilo */
+  .inf-header-1 { display:flex; align-items:stretch; gap:16px; margin-bottom:28px; }
+  .inf-h1-bar { width:6px; background:var(--olive); border-radius:3px; }
+  .inf-h1-main { flex:1; }
+  .inf-h1-title { font-family:'Fraunces',serif; font-size:30px; font-weight:700; color:var(--ink); line-height:1.1; }
+  .inf-h1-sub { font-size:14px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.08em; margin-top:4px; }
+  .inf-h1-meta { text-align:right; display:flex; flex-direction:column; justify-content:center; }
+  .inf-h1-periodo { font-family:'Fraunces',serif; font-size:18px; font-weight:600; color:var(--olive-2); }
+  .inf-h1-stats { font-size:12px; color:var(--ink-mute); margin-top:2px; }
+
+  /* Encabezado estilo 2 - Simple */
+  .inf-header-2 { border-bottom:2px solid var(--ink); padding-bottom:14px; margin-bottom:28px; }
+  .inf-h2-title { font-family:'Fraunces',serif; font-size:24px; font-weight:600; color:var(--ink); }
+  .inf-h2-meta { font-size:13px; color:var(--ink-3); margin-top:4px; }
+
+  /* Encabezado estilo 3 - Minimalista */
+  .inf-header-3 { display:flex; justify-content:space-between; align-items:baseline; padding-bottom:10px; margin-bottom:24px; border-bottom:1px solid var(--hairline); }
+  .inf-h3-periodo { font-size:16px; font-weight:600; color:var(--ink); }
+  .inf-h3-stats { font-size:12px; color:var(--ink-mute); }
+
+  /* Secciones por cultivo */
+  .inf-cultivo-sec { margin-bottom:28px; page-break-inside:auto; }
+  .inf-cultivo-title { font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--olive); padding:6px 0 10px; border-bottom:1px solid var(--hairline-2); margin-bottom:14px; }
+
+  .inf-lote { padding:12px 0 16px; border-bottom:1px dashed var(--hairline); page-break-inside:avoid; }
+  .inf-lote:last-child { border-bottom:none; }
+  .inf-lote-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
+  .inf-lote-id { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .inf-lote-nombre { font-weight:700; font-size:15px; color:var(--ink); }
+  .inf-lote-campo { font-size:11px; color:var(--ink-mute); text-transform:uppercase; letter-spacing:.04em; }
+  .inf-lote-ef { font-size:13px; color:var(--ink-2); background:var(--paper-2); padding:2px 8px; border-radius:12px; }
+  .inf-lote-badges { display:flex; gap:6px; flex-wrap:wrap; }
+  .inf-badge { font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+  .inf-estado-malo{background:#F4D8C0;color:#8B3A20;} .inf-estado-regular{background:#F8E8C5;color:#7A5410;}
+  .inf-estado-bueno{background:#E8F0D9;color:#3A5028;} .inf-estado-muy-bueno{background:#DCEEDC;color:#2C5A2C;}
+  .inf-estado-excelente{background:#C7E5C7;color:#1E4A1E;}
+  .inf-aplica-si{background:#F4D8C0;color:#8B3A20;} .inf-aplica-no{background:var(--paper-2);color:var(--ink-mute);}
+  .inf-lote-coment { font-size:14px; color:var(--ink-2); line-height:1.55; margin:4px 0 8px; }
+  .inf-sincoment { color:var(--ink-mute); font-style:italic; }
+  .inf-fotos { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .inf-fotos img { width:150px; height:150px; object-fit:cover; border-radius:6px; border:1px solid var(--hairline-2); }
+
+  .inf-footer { margin-top:32px; padding-top:14px; border-top:1px solid var(--hairline); font-size:11px; color:var(--ink-mute); text-align:center; }
+  @media print { .inf-fotos img { width:130px; height:130px; } }
+</style>
+</head><body>
+  <div class="inf-actions">
+    <button class="inf-btn" onclick="window.close()">Cerrar</button>
+    <button class="inf-btn inf-btn-primary" onclick="window.print()">Imprimir / Guardar PDF</button>
+  </div>
+  ${headerHTML}
+  ${bodyHTML}
+  <div class="inf-footer">Generado el ${fechaGen} · Tablero La Madrugada</div>
+</body></html>`;
+}
+
 
 // =============== Init ===============
 function init() {
@@ -2179,7 +2519,7 @@ function init() {
     if (e.target.id === 'modal-backdrop') closeModal();
   });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Escape') { closeModal(); closeInformeConfig(); }
     // Navegación con flechas solo cuando el modal está abierto en la vista Monitoreo
     const modalOpen = document.getElementById('modal-backdrop').classList.contains('active');
     if (modalOpen && state.view === 'monitoreo' && monNavList.length) {
