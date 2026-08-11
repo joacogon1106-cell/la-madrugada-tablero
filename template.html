@@ -1927,6 +1927,17 @@ function normalizeEstado(e) {
   return (e || '').toLowerCase().replace(/\s+/g, '-').trim();
 }
 
+// Formatea el estado fenológico para mostrar.
+// Cereales (Zadoks, código de 2 dígitos): "13 - Tres hojas" -> "Z1.3 - Tres hojas".
+// Escalas V/R (maíz, soja, girasol), Barbecho y Sembrado: quedan igual.
+function formatEF(ef) {
+  if (!ef) return '';
+  ef = ef.trim();
+  const m = ef.match(/^(\d)(\d)(.*)$/);
+  if (m) return `Z${m[1]}.${m[2]}${m[3]}`;
+  return ef;
+}
+
 // Convierte fecha a objeto ordenable + texto legible
 function parseFecha(raw) {
   if (!raw) return { key: '0000-00-00', label: 'Sin fecha' };
@@ -2119,7 +2130,7 @@ function renderMonitoreo() {
           <div class="mon-reg-main">
             <div class="mon-reg-linea">
               ${r.cultivo ? `<span class="mon-reg-cultivo">${r.cultivo}</span>` : ''}
-              ${r.ef ? `<span class="mon-reg-ef">${r.ef}</span>` : ''}
+              ${r.ef ? `<span class="mon-reg-ef">${formatEF(r.ef)}</span>` : ''}
             </div>
             ${r.comentarios ? `<div class="mon-reg-coment">${r.comentarios}</div>` : ''}
           </div>
@@ -2189,7 +2200,7 @@ function openMonitoreoModal(idx) {
     </div>
     <div class="mon-modal-datos">
       ${r.cultivo ? `<div class="mon-modal-row"><span class="mon-modal-label">Cultivo</span><span class="mon-modal-val">${r.cultivo}</span></div>` : ''}
-      ${r.ef ? `<div class="mon-modal-row"><span class="mon-modal-label">Estado fenológico</span><span class="mon-modal-val">${r.ef}</span></div>` : ''}
+      ${r.ef ? `<div class="mon-modal-row"><span class="mon-modal-label">Estado fenológico</span><span class="mon-modal-val">${formatEF(r.ef)}</span></div>` : ''}
       ${r.comentarios ? `<div class="mon-modal-row"><span class="mon-modal-label">Comentarios</span><span class="mon-modal-val">${r.comentarios}</span></div>` : ''}
     </div>
     ${fotosHtml}
@@ -2386,7 +2397,7 @@ function construirInformeHTML(regs, d1, d2) {
             <div class="inf-lote-id">
               <span class="inf-lote-nombre">${r.lote}</span>
               <span class="inf-lote-campo">${(r.campo||'').replace(/_/g,' ')}</span>
-              ${r.ef ? `<span class="inf-lote-ef">${r.ef}</span>` : ''}
+              ${r.ef ? `<span class="inf-lote-ef">${formatEF(r.ef)}</span>` : ''}
             </div>
             <div class="inf-lote-badges">${badges}</div>
           </div>
