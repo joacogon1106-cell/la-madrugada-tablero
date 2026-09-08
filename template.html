@@ -1475,12 +1475,223 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+/* ================= SOLAPA PLANOS ================= */
+.planos-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0 18px 0;
+  flex-wrap: wrap;
 }
+.planos-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+}
+.planos-select {
+  min-width: 180px;
+}
+.planos-stats {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+#planos-mapa {
+  height: 640px;
+  border-radius: 10px;
+  border: 1px solid var(--hairline);
+  overflow: hidden;
+  background: var(--paper);
+}
+/* Tooltip permanente con el código de lote */
+.leaflet-tooltip.lote-tooltip {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+}
+.leaflet-tooltip.lote-tooltip.no-agr {
+  color: var(--ink-3);
+  font-style: italic;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.75);
+}
+.leaflet-tooltip.lote-tooltip.hover-tooltip {
+  background: rgba(255, 255, 255, 0.98);
+  padding: 6px 10px;
+  border: 1px solid var(--olive);
+  border-radius: 6px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--ink);
+  font-weight: 500;
+  min-width: 140px;
+}
+.leaflet-tooltip.lote-tooltip.hover-tooltip .hover-lote {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--olive);
+  display: block;
+  margin-bottom: 3px;
+}
+.leaflet-tooltip.lote-tooltip.hover-tooltip .hover-sup {
+  font-size: 11px;
+  color: var(--ink-3);
+}
+/* Leyenda de cultivos en el mapa */
+.leaflet-control.planos-legend {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 10px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: var(--ink);
+  max-width: 200px;
+}
+.planos-legend h4 {
+  margin: 0 0 8px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+.legend-color.no-agr {
+  border-style: dashed;
+  border-color: #666;
+}
+
+@media (max-width: 768px) {
+  #planos-mapa { height: 480px; }
+  .planos-toolbar { padding: 10px 0 14px 0; }
+  .planos-stats { margin-left: 0; width: 100%; }
+}
+
+/* Botón "Mi ubicación" */
+.planos-loc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink-2);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.planos-loc-btn:hover {
+  border-color: var(--olive);
+  color: var(--olive);
+}
+.planos-loc-btn.buscando {
+  color: var(--ochre);
+  border-color: var(--ochre);
+  cursor: wait;
+}
+.planos-loc-btn.activo {
+  background: #2A6BB2;
+  color: white;
+  border-color: #2A6BB2;
+}
+.planos-loc-btn.activo:hover {
+  background: #1E5090;
+  border-color: #1E5090;
+}
+.planos-loc-btn.error {
+  color: var(--rust);
+  border-color: var(--rust);
+}
+.planos-loc-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* Botón flotante "Centrar en mi ubicación" (aparece solo con seguimiento activo) */
+.leaflet-control.planos-recenter {
+  background: white;
+  padding: 8px 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  user-select: none;
+  transition: all 0.15s;
+}
+.leaflet-control.planos-recenter:hover {
+  background: #f5f5f5;
+  border-color: var(--olive);
+}
+
+/* Marcador de posición del usuario (punto azul con halo pulsante) */
+.user-location-marker {
+  position: relative;
+  width: 20px;
+  height: 20px;
+}
+.user-location-marker .dot {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #2A6BB2;
+  border: 2.5px solid white;
+  box-shadow: 0 0 3px rgba(0,0,0,0.4);
+  z-index: 2;
+}
+.user-location-marker .pulse {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: rgba(42, 107, 178, 0.4);
+  animation: user-loc-pulse 2s ease-out infinite;
+  z-index: 1;
+}
+@keyframes user-loc-pulse {
+  0% { width: 20px; height: 20px; opacity: 0.6; }
+  100% { width: 60px; height: 60px; opacity: 0; }
+}
+
+/* Fin solapa Planos */
 </style>
+
+<!-- Leaflet (mapa de la solapa Planos) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 </head>
 <body>
 
@@ -1521,6 +1732,9 @@ body {
     </button>
     <button class="tab" data-view="monitoreo">
       Monitoreo <span class="tab-count" id="count-monitoreo">0</span>
+    </button>
+    <button class="tab" data-view="planos">
+      Planos
     </button>
   </nav>
 
@@ -1579,6 +1793,23 @@ body {
       <div class="mon-list" id="mon-list"></div>
     </div>
 
+    <div class="view" id="view-planos">
+      <div class="planos-toolbar">
+        <label class="planos-label">Establecimiento:</label>
+        <select class="filter-select planos-select" id="planos-est-selector">
+          <option value="La_Madrugada">La Madrugada</option>
+          <option value="La_Rodesia">La Rodesia</option>
+          <option value="ambos">Ver ambos</option>
+        </select>
+        <button class="planos-loc-btn" id="planos-loc-btn" title="Activar mi ubicación en tiempo real">
+          <span class="planos-loc-icon">📍</span>
+          <span class="planos-loc-text">Mi ubicación</span>
+        </button>
+        <div class="planos-stats" id="planos-stats">—</div>
+      </div>
+      <div id="planos-mapa"></div>
+    </div>
+
   </main>
 
 </div>
@@ -1599,6 +1830,8 @@ body {
 
 <script>
 const DATA = __DATA_PLACEHOLDER__;
+const GEO_LA_MADRUGADA = __GEOJSON_MADRUGADA__;
+const GEO_LA_RODESIA = __GEOJSON_RODESIA__;
 
 // =============== Helpers ===============
 const MESES = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
@@ -2506,11 +2739,13 @@ function init() {
       document.querySelectorAll('.view').forEach(v => {
         v.classList.toggle('active', v.id === 'view-' + state.view);
       });
-      // Ocultar los filtros del tablero principal en la solapa Monitoreo (tiene los suyos)
+      // Ocultar los filtros del tablero principal en Monitoreo y Planos (no aplican ahí)
       const mainFilters = document.getElementById('filters');
-      if (mainFilters) mainFilters.style.display = (state.view === 'monitoreo') ? 'none' : '';
+      if (mainFilters) mainFilters.style.display = (state.view === 'monitoreo' || state.view === 'planos') ? 'none' : '';
       // Cargar monitoreos al entrar por primera vez
       if (state.view === 'monitoreo') loadMonitoreo(false);
+      // Inicializar mapa al entrar por primera vez a Planos
+      if (state.view === 'planos') initPlanosMapa();
     });
   });
 
@@ -3218,6 +3453,347 @@ function renderWeather(data) {
     </div>
     <div class="weather-grid">${cardsHtml}</div>
   `;
+}
+
+// ================= SOLAPA PLANOS =================
+const PLANOS_STATE = { mapa: null, layers: {}, initialized: false };
+
+// Colores por abreviatura de cultivo (matchea con los colores de la solapa Lotes)
+const PLANOS_COLORS_ABREV = {
+  'mz':      '#C49340',
+  'mzt':     '#B5832F',
+  'sj':      '#5E8541',
+  'sj1':     '#5E8541',
+  'sj2':     '#7BA354',
+  'gi':      '#E0A030',
+  'ce':      '#C8A858',
+  'ce/sj2':  '#8A7040',
+  'tr':      '#C8A858',
+  'av':      '#C8A858',
+  'cen':     '#C8A858',
+  'sor':     '#A85A3D',
+  'pp':      '#7A8B5C',
+  'pn':      '#7A8B5C'
+};
+
+// Nombre legible desde la abreviatura (usa el diccionario global si existe)
+function planosCultivoNombre(abrev) {
+  if (!abrev) return '—';
+  if (typeof DATA !== 'undefined' && DATA.cultivos_dict && DATA.cultivos_dict[abrev]) {
+    return DATA.cultivos_dict[abrev];
+  }
+  const fallback = {
+    'mz': 'Maíz', 'mzt': 'Maíz Tardío',
+    'sj': 'Soja', 'sj1': 'Soja 1ra', 'sj2': 'Soja 2da',
+    'gi': 'Girasol', 'ce': 'Cebada', 'ce/sj2': 'Cebada / Soja 2da',
+    'tr': 'Trigo', 'av': 'Avena', 'cen': 'Centeno',
+    'sor': 'Sorgo', 'pp': 'Pastura', 'pn': 'Pastura natural'
+  };
+  return fallback[abrev] || abrev;
+}
+
+function planosColorPoligono(abrev) {
+  return PLANOS_COLORS_ABREV[abrev] || '#95A695';
+}
+
+function estiloPoligonoPlano(feature) {
+  const p = feature.properties;
+  if (!p.es_agricola) {
+    return { color: '#666', weight: 1.5, fillColor: '#BBB', fillOpacity: 0.12, dashArray: '4,3' };
+  }
+  const color = planosColorPoligono(p.cultivo_abrev);
+  return { color: color, weight: 2, fillColor: color, fillOpacity: 0.5 };
+}
+
+function planosOnEachFeature(feature, layer) {
+  const p = feature.properties;
+
+  // Etiqueta permanente con el código del lote en el centro
+  layer.bindTooltip(p.lote, {
+    permanent: true,
+    direction: 'center',
+    className: 'lote-tooltip' + (p.es_agricola ? '' : ' no-agr')
+  });
+
+  // Hover: engrosar borde
+  layer.on('mouseover', function () {
+    this.setStyle({ weight: 4, fillOpacity: 0.7 });
+    this.bringToFront();
+  });
+  layer.on('mouseout', function () {
+    this.setStyle(estiloPoligonoPlano(feature));
+  });
+
+  // Click: si es agrícola, abrir modal del lote (misma lógica que la solapa Lotes)
+  layer.on('click', function () {
+    if (p.es_agricola) {
+      openLoteModal(p.establecimiento, p.lote);
+    }
+  });
+}
+
+function planosMostrarEstab(nombre) {
+  const s = PLANOS_STATE;
+  if (!s.mapa) return;
+  Object.values(s.layers).forEach(l => s.mapa.removeLayer(l));
+
+  const stats = document.getElementById('planos-stats');
+  if (nombre === 'ambos') {
+    s.layers.La_Madrugada.addTo(s.mapa);
+    s.layers.La_Rodesia.addTo(s.mapa);
+    const bounds = s.layers.La_Madrugada.getBounds().extend(s.layers.La_Rodesia.getBounds());
+    s.mapa.fitBounds(bounds, { padding: [30, 30] });
+    const t = GEO_LA_MADRUGADA.features.filter(f => f.properties.es_agricola).length +
+              GEO_LA_RODESIA.features.filter(f => f.properties.es_agricola).length;
+    stats.textContent = t + ' lotes agrícolas · 2 establecimientos';
+  } else {
+    s.layers[nombre].addTo(s.mapa);
+    s.mapa.fitBounds(s.layers[nombre].getBounds(), { padding: [30, 30] });
+    const t = (nombre === 'La_Madrugada' ? GEO_LA_MADRUGADA : GEO_LA_RODESIA)
+                .features.filter(f => f.properties.es_agricola).length;
+    stats.textContent = t + ' lotes agrícolas';
+  }
+}
+
+function planosCrearLeyenda() {
+  const legend = L.control({ position: 'bottomright' });
+  legend.onAdd = function () {
+    const div = L.DomUtil.create('div', 'leaflet-control planos-legend');
+    const cultivosUsados = new Set();
+    [GEO_LA_MADRUGADA, GEO_LA_RODESIA].forEach(g => g.features.forEach(f => {
+      if (f.properties.es_agricola && f.properties.cultivo_abrev) {
+        cultivosUsados.add(f.properties.cultivo_abrev);
+      }
+    }));
+    let html = '<h4>Cultivo 26-27</h4>';
+    Array.from(cultivosUsados).sort().forEach(c => {
+      const color = planosColorPoligono(c);
+      const nombre = planosCultivoNombre(c);
+      html += `<div class="legend-item"><div class="legend-color" style="background:${color}"></div><span>${nombre}</span></div>`;
+    });
+    html += `<div class="legend-item"><div class="legend-color no-agr" style="background:#BBB;opacity:0.4"></div><span style="color:#666;font-style:italic">No agrícola</span></div>`;
+    div.innerHTML = html;
+    return div;
+  };
+  return legend;
+}
+
+function initPlanosMapa() {
+  const s = PLANOS_STATE;
+  if (s.initialized) return;
+  s.initialized = true;
+
+  if (typeof L === 'undefined') {
+    document.getElementById('planos-mapa').innerHTML =
+      '<div style="padding:40px;text-align:center;color:var(--ink-3);font-style:italic">No se pudo cargar el mapa. Verificá tu conexión a internet.</div>';
+    return;
+  }
+
+  s.mapa = L.map('planos-mapa', { scrollWheelZoom: true, preferCanvas: false });
+
+  // Fondo satelital de Esri (gratis, sin API key)
+  L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    {
+      maxZoom: 19,
+      attribution: 'Tiles © Esri, Maxar, Earthstar Geographics'
+    }
+  ).addTo(s.mapa);
+
+  // Cargar capas
+  s.layers.La_Madrugada = L.geoJSON(GEO_LA_MADRUGADA, {
+    style: estiloPoligonoPlano,
+    onEachFeature: planosOnEachFeature
+  });
+  s.layers.La_Rodesia = L.geoJSON(GEO_LA_RODESIA, {
+    style: estiloPoligonoPlano,
+    onEachFeature: planosOnEachFeature
+  });
+
+  // Leyenda
+  planosCrearLeyenda().addTo(s.mapa);
+
+  // Selector
+  const sel = document.getElementById('planos-est-selector');
+  sel.addEventListener('change', e => planosMostrarEstab(e.target.value));
+
+  // Botón de ubicación
+  const locBtn = document.getElementById('planos-loc-btn');
+  if (locBtn) locBtn.addEventListener('click', toggleUserLocation);
+
+  // Vista inicial: La Madrugada
+  planosMostrarEstab('La_Madrugada');
+
+  // Forzar redibujado (a veces el mapa arranca chico si el contenedor recién se mostró)
+  setTimeout(() => s.mapa.invalidateSize(), 200);
+}
+
+// =============== Ubicación del usuario en tiempo real ===============
+const USER_LOC_STATE = {
+  activo: false,
+  watchId: null,
+  marker: null,
+  accuracyCircle: null,
+  recenterCtrl: null,
+  yaCentro: false  // solo centrar la primera vez
+};
+
+function toggleUserLocation() {
+  const btn = document.getElementById('planos-loc-btn');
+  const state = USER_LOC_STATE;
+
+  if (state.activo) {
+    // Desactivar
+    detenerUserLocation();
+    return;
+  }
+
+  // Verificar disponibilidad
+  if (!('geolocation' in navigator)) {
+    setLocBtnState('error', 'GPS no disponible');
+    setTimeout(() => setLocBtnState('off'), 3000);
+    return;
+  }
+
+  // Pedir permiso e iniciar tracking
+  setLocBtnState('buscando', 'Buscando…');
+  state.watchId = navigator.geolocation.watchPosition(
+    onUserLocationUpdate,
+    onUserLocationError,
+    {
+      enableHighAccuracy: true,
+      maximumAge: 3000,
+      timeout: 20000
+    }
+  );
+  state.activo = true;
+}
+
+function onUserLocationUpdate(pos) {
+  const state = USER_LOC_STATE;
+  const s = PLANOS_STATE;
+  if (!s.mapa) return;
+
+  const lat = pos.coords.latitude;
+  const lon = pos.coords.longitude;
+  const acc = pos.coords.accuracy || 30;
+
+  setLocBtnState('activo', 'Ubicación activa');
+
+  // Crear o mover el marker
+  if (!state.marker) {
+    const icon = L.divIcon({
+      className: 'user-location-icon',
+      html: '<div class="user-location-marker"><div class="pulse"></div><div class="dot"></div></div>',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    });
+    state.marker = L.marker([lat, lon], { icon: icon, interactive: false, keyboard: false, zIndexOffset: 1000 }).addTo(s.mapa);
+    state.accuracyCircle = L.circle([lat, lon], {
+      radius: acc,
+      color: '#2A6BB2',
+      weight: 1,
+      fillColor: '#2A6BB2',
+      fillOpacity: 0.08,
+      interactive: false
+    }).addTo(s.mapa);
+
+    // Agregar botón "recentrar" al mapa
+    agregarBotonRecentrar();
+
+    // Centrar solo la primera vez
+    if (!state.yaCentro) {
+      state.yaCentro = true;
+      s.mapa.setView([lat, lon], Math.max(s.mapa.getZoom(), 16));
+    }
+  } else {
+    state.marker.setLatLng([lat, lon]);
+    state.accuracyCircle.setLatLng([lat, lon]);
+    state.accuracyCircle.setRadius(acc);
+  }
+}
+
+function onUserLocationError(err) {
+  const state = USER_LOC_STATE;
+  console.error('Error de geolocalización:', err);
+  let msg = 'Error GPS';
+  if (err.code === 1) msg = 'Permiso denegado';
+  else if (err.code === 2) msg = 'Posición no disponible';
+  else if (err.code === 3) msg = 'Tiempo agotado';
+
+  setLocBtnState('error', msg);
+  detenerUserLocation(false);
+  // Volver a estado off después de mostrar el error
+  setTimeout(() => setLocBtnState('off'), 4000);
+}
+
+function detenerUserLocation(volverAOff = true) {
+  const state = USER_LOC_STATE;
+  const s = PLANOS_STATE;
+  if (state.watchId !== null) {
+    navigator.geolocation.clearWatch(state.watchId);
+    state.watchId = null;
+  }
+  if (state.marker && s.mapa) {
+    s.mapa.removeLayer(state.marker);
+    state.marker = null;
+  }
+  if (state.accuracyCircle && s.mapa) {
+    s.mapa.removeLayer(state.accuracyCircle);
+    state.accuracyCircle = null;
+  }
+  if (state.recenterCtrl && s.mapa) {
+    s.mapa.removeControl(state.recenterCtrl);
+    state.recenterCtrl = null;
+  }
+  state.activo = false;
+  state.yaCentro = false;
+  if (volverAOff) setLocBtnState('off');
+}
+
+function setLocBtnState(estado, texto) {
+  const btn = document.getElementById('planos-loc-btn');
+  if (!btn) return;
+  btn.classList.remove('buscando', 'activo', 'error');
+  const textEl = btn.querySelector('.planos-loc-text');
+  if (estado === 'off') {
+    if (textEl) textEl.textContent = 'Mi ubicación';
+    btn.title = 'Activar mi ubicación en tiempo real';
+  } else if (estado === 'buscando') {
+    btn.classList.add('buscando');
+    if (textEl) textEl.textContent = texto || 'Buscando…';
+  } else if (estado === 'activo') {
+    btn.classList.add('activo');
+    if (textEl) textEl.textContent = texto || 'Ubicación activa';
+    btn.title = 'Tocá para desactivar';
+  } else if (estado === 'error') {
+    btn.classList.add('error');
+    if (textEl) textEl.textContent = texto || 'Error';
+  }
+}
+
+function agregarBotonRecentrar() {
+  const state = USER_LOC_STATE;
+  const s = PLANOS_STATE;
+  if (state.recenterCtrl) return;
+
+  const RecenterControl = L.Control.extend({
+    options: { position: 'topright' },
+    onAdd: function () {
+      const div = L.DomUtil.create('div', 'leaflet-control planos-recenter');
+      div.innerHTML = '📍';
+      div.title = 'Centrar en mi ubicación';
+      L.DomEvent.disableClickPropagation(div);
+      L.DomEvent.on(div, 'click', function () {
+        if (state.marker) {
+          s.mapa.setView(state.marker.getLatLng(), Math.max(s.mapa.getZoom(), 16));
+        }
+      });
+      return div;
+    }
+  });
+  state.recenterCtrl = new RecenterControl();
+  state.recenterCtrl.addTo(s.mapa);
 }
 </script>
 
