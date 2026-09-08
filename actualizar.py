@@ -295,10 +295,35 @@ def procesar_planillas(buf_cultivos, buf_agricultura):
 # =========================================================================
 def generar_html(data):
     from pathlib import Path
-    template_path = Path(__file__).parent / "template.html"
+    base = Path(__file__).parent
+    template_path = base / "template.html"
+    geo_ma_path = base / "la_madrugada.geojson"
+    geo_ro_path = base / "la_rodesia.geojson"
+
     html = template_path.read_text(encoding="utf-8")
     data_json = json.dumps(data, ensure_ascii=False, separators=(',', ':'), default=str)
-    return html.replace("__DATA_PLACEHOLDER__", data_json)
+    html = html.replace("__DATA_PLACEHOLDER__", data_json)
+
+    # Inyectar GeoJSONs si están disponibles; sino, usar FeatureCollection vacío
+    # (así la app no se rompe si por algún motivo faltan los archivos)
+    if geo_ma_path.exists():
+        geo_ma = geo_ma_path.read_text(encoding="utf-8").strip()
+        print(f"  ✓ GeoJSON La Madrugada cargado ({len(geo_ma):,} bytes)")
+    else:
+        geo_ma = '{"type":"FeatureCollection","features":[]}'
+        print("  ⚠ Falta la_madrugada.geojson — se usa FeatureCollection vacío")
+
+    if geo_ro_path.exists():
+        geo_ro = geo_ro_path.read_text(encoding="utf-8").strip()
+        print(f"  ✓ GeoJSON La Rodesia cargado ({len(geo_ro):,} bytes)")
+    else:
+        geo_ro = '{"type":"FeatureCollection","features":[]}'
+        print("  ⚠ Falta la_rodesia.geojson — se usa FeatureCollection vacío")
+
+    html = html.replace("__GEOJSON_MADRUGADA__", geo_ma)
+    html = html.replace("__GEOJSON_RODESIA__", geo_ro)
+
+    return html
 
 
 # =========================================================================
