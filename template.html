@@ -1500,11 +1500,14 @@ body {
   color: var(--ink-3);
 }
 #planos-mapa {
-  height: 640px;
+  height: 640px !important;
+  min-height: 640px;
   border-radius: 10px;
   border: 1px solid var(--hairline);
   overflow: hidden;
   background: var(--paper);
+  display: block;
+  width: 100%;
 }
 /* Tooltip permanente con el código de lote */
 .leaflet-tooltip.lote-tooltip {
@@ -1589,7 +1592,7 @@ body {
 }
 
 @media (max-width: 768px) {
-  #planos-mapa { height: 480px; }
+  #planos-mapa { height: 480px !important; min-height: 480px; }
   .planos-toolbar { padding: 10px 0 14px 0; }
   .planos-stats { margin-left: 0; width: 100%; }
 }
@@ -2745,7 +2748,14 @@ function init() {
       // Cargar monitoreos al entrar por primera vez
       if (state.view === 'monitoreo') loadMonitoreo(false);
       // Inicializar mapa al entrar por primera vez a Planos
-      if (state.view === 'planos') initPlanosMapa();
+      // (y llamar invalidateSize para que redibuje bien si el contenedor cambió de tamaño)
+      if (state.view === 'planos') {
+        initPlanosMapa();
+        if (PLANOS_STATE.mapa) {
+          setTimeout(() => PLANOS_STATE.mapa.invalidateSize(), 100);
+          setTimeout(() => PLANOS_STATE.mapa.invalidateSize(), 400);
+        }
+      }
     });
   });
 
@@ -3329,6 +3339,7 @@ const MESES_CORTOS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct
 
 init();
 loadWeather();
+loadMonitoreo(false);
 
 // SVG icons por código WMO de Open-Meteo
 // https://open-meteo.com/en/docs#weathervariables
