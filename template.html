@@ -1810,7 +1810,7 @@ body {
         </button>
         <div class="planos-stats" id="planos-stats">—</div>
       </div>
-      <div id="planos-mapa"></div>
+      <div id="planos-mapa" style="height:640px;min-height:640px;width:100%;display:block;position:relative;"></div>
     </div>
 
   </main>
@@ -3600,6 +3600,13 @@ function initPlanosMapa() {
     return;
   }
 
+  // Forzar height por las dudas de que algún CSS esté aplastando el div
+  const mapEl = document.getElementById('planos-mapa');
+  mapEl.style.setProperty('height', '640px', 'important');
+  mapEl.style.setProperty('min-height', '640px', 'important');
+  mapEl.style.setProperty('width', '100%', 'important');
+  mapEl.style.setProperty('display', 'block', 'important');
+
   s.mapa = L.map('planos-mapa', { scrollWheelZoom: true, preferCanvas: false });
 
   // Fondo satelital de Esri (gratis, sin API key)
@@ -3635,8 +3642,12 @@ function initPlanosMapa() {
   // Vista inicial: La Madrugada
   planosMostrarEstab('La_Madrugada');
 
-  // Forzar redibujado (a veces el mapa arranca chico si el contenedor recién se mostró)
-  setTimeout(() => s.mapa.invalidateSize(), 200);
+  // Forzar redibujado varias veces con delays crecientes.
+  // Si el contenedor recién se está renderizando cuando se crea el mapa,
+  // Leaflet mide mal el tamaño y necesita ser "avisado" cuando ya está estable.
+  [50, 200, 500, 1000].forEach(ms => setTimeout(() => {
+    if (s.mapa) s.mapa.invalidateSize();
+  }, ms));
 }
 
 // =============== Ubicación del usuario en tiempo real ===============
